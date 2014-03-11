@@ -59,7 +59,7 @@ newTalent {
   random_ego = "attack",
   tactical = {ATTACK = {weapon = 2}},
   range = archery_range,
-  cooldown = 5,
+  cooldown = 0,
   stamina = 10,
 	on_pre_use = function(self, t, silent)
     if not self:hasArcheryWeapon("sling") then
@@ -74,7 +74,7 @@ newTalent {
     return self:combatTalentWeaponDamage(t, 1.4, 2.4)
   end,
   callbackOnMove = function(self, t, moved, force, ox, oy)
-    local cooldown = self.talents_cd[t.id]
+    local cooldown = self.talents_cd[t.id] or 0
     if cooldown > 0 then
       self.talents_cd[t.id] = math.max(cooldown - 1, 0)
     end
@@ -85,11 +85,15 @@ newTalent {
       return nil
     end
 
-		local targets = self:archeryAcquireTargets(nil, {one_shot=true})
-		if not targets then return end
-
     local old_speed = self.combat_physspeed
     self.combat_physspeed = old_speed * 2
+
+		local targets = self:archeryAcquireTargets(nil, {one_shot=true})
+		if not targets then
+      self.combat_physspeed = old_speed
+      return
+    end
+
 		self:archeryShoot(targets, t, nil, {mult=t.getDamage(self, t)})
     self.combat_physspeed = old_speed
     return true
