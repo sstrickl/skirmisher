@@ -16,7 +16,7 @@
 newTalentType {
   type = "cunning/acrobatics",
   name = "Acrobatics",
+  generic = true,
   allow_random = true,
   description = "For light footed Rogues who prefer flight to fighting fair!",
 }
-
