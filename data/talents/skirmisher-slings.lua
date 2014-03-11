@@ -20,6 +20,16 @@ newTalentType {
   description = "Slings! Pow Pow!",
 }
 
+local sling_equipped = function(self, silent)
+  if not self:hasArcheryWeapon("sling") then
+    if not silent then
+      game.logPlayer(self, "You must weild a sling!")
+    end
+    return false
+  end
+  return true
+end
+
 -- Hack in Sling Supremacy to affect reload rate.
 local reload = Talents:getTalentFromId("T_RELOAD")
 local old_shots_per_turn = reload.shots_per_turn
@@ -63,7 +73,6 @@ newTalent {
 	end,
 }
 
--- TODO Does not yet reduce cooldown on move.
 newTalent {
   short_name = "SKIRMISHER_SWIFT_SHOT",
   name = "Swift Shot",
@@ -76,15 +85,7 @@ newTalent {
   range = archery_range,
   cooldown = 0,
   stamina = 10,
-	on_pre_use = function(self, t, silent)
-    if not self:hasArcheryWeapon("sling") then
-      if not silent then
-        game.logPlayer(self, "You require a sling for this talent.")
-      end
-      return false
-    end
-    return true
-  end,
+	on_pre_use = function(self, t, silent) return sling_equipped(self, silent) end,
   getDamage = function(self, t)
     return self:combatTalentWeaponDamage(t, 1.4, 2.4)
   end,
@@ -95,10 +96,7 @@ newTalent {
     end
   end,
   action = function(self, t)
-		if not self:hasArcheryWeapon("sling") then
-      game.logPlayer(self, "You must wield a sling!")
-      return nil
-    end
+		if not sling_equipped(self) then return end
 
     local old_speed = self.combat_physspeed
     self.combat_physspeed = old_speed * 2
