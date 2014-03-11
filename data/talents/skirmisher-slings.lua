@@ -73,6 +73,12 @@ newTalent {
   getDamage = function(self, t)
     return self:combatTalentWeaponDamage(t, 1.4, 2.4)
   end,
+  callbackOnMove = function(self, t, moved, force, ox, oy)
+    local cooldown = self.talents_cd[t.id]
+    if cooldown > 0 then
+      self.talents_cd[t.id] = math.max(cooldown - 1, 0)
+    end
+  end,
   action = function(self, t)
 		if not self:hasArcheryWeapon("sling") then
       game.logPlayer(self, "You must wield a sling!")
@@ -89,7 +95,7 @@ newTalent {
     return true
   end,
 	info = function(self, t)
-		return ([[Fire off a quick sling bullet for %d%% damage, at double your normal attack speed.]])
+		return ([[Fire off a quick sling bullet for %d%% damage, at double your normal attack speed. Moving lowers the cooldown by 1.]])
       :format(t.getDamage(self, t) * 100)
 	end,
 }
