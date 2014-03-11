@@ -12,11 +12,14 @@ newBirthDescriptor{
    power_source = {technique=true},
    stats = {dex = 4, cun = 4, wil = 1},
    talents_types = {
-      ["cunning/trapping"]={false, 0.1},
-      ["technique/combat-training"]={true, 0.3},
-      ["cunning/survival"]={true, 0.3},
-      ["technique/field-control"]={false, 0.1},
-      ["technique/skirmisher-slings"]={true, 0.3},
+     -- Class
+     ["technique/skirmisher-slings"]={true, 0.3},
+     ["cunning/called-shots"]={true, 0.3},
+     ["cunning/trapping"]={false, 0.1},
+     -- Generic
+     ["technique/combat-training"]={true, 0.3},
+     ["cunning/survival"]={true, 0.3},
+     ["technique/field-control"]={false, 0.1},
    },
    unlockable_talents_types = {
      ["cunning/poisons"]={false, 0.2, "rogue_poisons"},
@@ -25,6 +28,7 @@ newBirthDescriptor{
       [ActorTalents.T_WEAPON_COMBAT] = 1,
       [ActorTalents.T_SHOOT] = 1,
       [ActorTalents.T_SKIRMISHER_SLING_SUPREMACY] = 1,
+      [ActorTalents.T_SKIRMISHER_KNEECAPPER] = 1,
    },
    copy = {
       resolvers.equip{
