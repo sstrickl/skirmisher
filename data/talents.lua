@@ -44,7 +44,6 @@ highReqGen = function(abil, rank)
   return req_table
 end
 
-
 damDesc = function(self, type, dam)
 	-- Increases damage
 	if self.inc_damage then
