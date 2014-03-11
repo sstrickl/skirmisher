@@ -31,9 +31,12 @@ newBirthDescriptor{
   
     -- class
     ["technique/skirmisher-slings"]={true, 0.3},
+    ["technique/called-shots"]={true, 0.3},
+    ["technique/buckler-training"]={true, 0.3},
     ["cunning/trapping"]={false, 0.1},
     
     -- generic
+    ["cunning/acrobatics"]={true, 0.3},
     ["cunning/survival"]={true, 0.3},
     ["technique/combat-training"]={true, 0.3},
     ["technique/field-control"]={false, 0.1},

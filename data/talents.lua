@@ -55,3 +55,6 @@ damDesc = function(self, type, dam)
 end
 
 load("/data-skirmisher/talents/skirmisher-slings.lua")
+load("/data-skirmisher/talents/called-shots.lua")
+load("/data-skirmisher/talents/buckler-training.lua")
+load("/data-skirmisher/talents/acrobatics.lua")
