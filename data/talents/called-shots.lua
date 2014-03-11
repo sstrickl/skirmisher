@@ -34,7 +34,7 @@ newTalent {
   short_name = "SKIRMISHER_KNEECAPPER",
   name = "Kneecapper",
   type = {"cunning/called-shots", 1},
-  require = techs_cun_req1,
+  require = lowReqGen('cun', 1),
   points = 5,
   no_energy = "fake",
   random_ego = "attack",
