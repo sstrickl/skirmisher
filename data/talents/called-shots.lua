@@ -27,6 +27,7 @@ newTalent {
   stamina = 10,
   cooldown = 8,
   requires_target = true,
+  range = archery_range,
 	on_pre_use = function(self, t, silent) return sling_equipped(self, silent) end,
   pin_duration = function(self, t)
     return math.floor(1 + self:getTalentLevel(t) * 0.2)
