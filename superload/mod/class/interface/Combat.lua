@@ -17,4 +17,24 @@ _M = loadPrevious(...)
 
 _M:addCombatTraining("sling", "T_SKIRMISHER_SLING_SUPREMACY")
 
+local base_combatArmorHardiness = _M.combatArmorHardiness
+local base_attackTargetWith = _M.attackTargetWith
+
+function _M:combatArmorHardiness()
+  local hardy = base_combatArmorHardiness(self)
+  if self:knowTalent(self.T_SKIRMISHER_BUCKLER_EXPERTISE) then
+    hardy = hardy + self:callTalent(self.T_SKIRMISHER_BUCKLER_EXPERTISE, "getHardiness")
+  end
+  return util.bound(hardy, 0, 100)
+end
+
+function _M:attackTargetWith(target, weapon, damtype, mult, force_dam)
+  print("[SKIRMISHER] using modified attackTargetWith")
+  if target:knowTalent(target.T_SKIRMISHER_BUCKLER_EXPERTISE) then
+    local t = target:getTalentFromId(target.T_SKIRMISHER_BUCKLER_EXPERTISE)
+    t.onMelee(target, t)
+  end
+  return base_attackTargetWith(self, target, weapon, damtype, mult, force_dam)
+end
+
 return _M
