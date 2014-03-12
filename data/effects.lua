@@ -59,11 +59,12 @@ newEffect {
     end
     eff.last_x = self.x
     eff.last_y = self.y
-    eff.min_angle_last = normalize_direction(angle_last - eff.leniency)
-    eff.max_angle_last = normalize_direction(angle_last + eff.leniency)
+    eff.min_angle_last = normalize_direction(angle_last - eff.leniency_last)
+    eff.max_angle_last = normalize_direction(angle_last + eff.leniency_last)
   end,
   activate = function(self, eff)
     self:effectTemporaryValue(eff, "movement_speed", eff.move_speed_bonus)
+    eff.leniency_last = math.max(math.pi * 0.25, eff.leniency)
 
     eff.start_x = self.x
     eff.start_y = self.y
@@ -71,8 +72,8 @@ newEffect {
     eff.max_angle_start = normalize_direction(eff.direction + eff.leniency)
     eff.last_x = self.x
     eff.last_y = self.y
-    eff.min_angle_last = normalize_direction(eff.direction - eff.leniency)
-    eff.max_angle_last = normalize_direction(eff.direction + eff.leniency)
+    eff.min_angle_last = normalize_direction(eff.direction - eff.leniency_last)
+    eff.max_angle_last = normalize_direction(eff.direction + eff.leniency_last)
 
     -- AI won't use talents while active.
     if self.ai_state then
