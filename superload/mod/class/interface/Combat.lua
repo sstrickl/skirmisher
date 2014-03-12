@@ -32,7 +32,11 @@ function _M:attackTargetWith(target, weapon, damtype, mult, force_dam)
   print("[SKIRMISHER] using modified attackTargetWith")
   if target:knowTalent(target.T_SKIRMISHER_BUCKLER_EXPERTISE) then
     local t = target:getTalentFromId(target.T_SKIRMISHER_BUCKLER_EXPERTISE)
-    t.onMelee(target, t)
+    if t.shouldEvade(target, t) then
+      game.logSeen(target, "%s deflects the attack.", target.name:capitalize())
+      print("[SKIRMISHER] attack evaded")
+      return self:combatSpeed(weapon), false
+    end
   end
   return base_attackTargetWith(self, target, weapon, damtype, mult, force_dam)
 end

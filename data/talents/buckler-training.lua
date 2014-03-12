@@ -20,7 +20,6 @@ newTalentType {
   description = "Mastery over their shields separates Skirmishers from Archers, and gives them an edge.",
 }
 
--- this is apparently being overhauled?
 newTalent {
   short_name = "SKIRMISHER_BUCKLER_EXPERTISE",
   name = "Buckler Expertise",
@@ -35,21 +34,18 @@ newTalent {
   end,
   -- called by _M:combatArmorHardiness
   getHardiness = function(self, t)
-    return self:getTalentLevel(t) * 4;
+    return 0 --self:getTalentLevel(t) * 4;
   end,
   
-  onMelee = function(self, t)
-    if rng.percent(t.chance(self, t)) and self:hasShield() then
-      self:forceUseTalent(self.T_BLOCK, {ignore_cd=true, ignore_energy=true, ignore_ressources=true})
-    end
+  shouldEvade = function(self, t)
+    return rng.percent(t.chance(self, t)) and self:hasShield() and not self:hasHeavyArmor()
   end,
 
 	info = function(self, t)
     local block = t.chance(self, t)
     local armor = t.getHardiness(self, t)
 		return ([[Allows shields to be equipped, regardless of normal stat or talent requirements.
-			When you are attacked in melee, you have a %d%% to block, automatically triggering your Block talent. The chance scales with your Dexterity.
-			You also gain %d%% Armor Hardiness.]])
+			When you are attacked in melee, you have a %d%% chance to deflect the attack with your shield, completely evading it. The chance scales with your Dexterity.]])
       :format(block, armor)
 	end,
 }
