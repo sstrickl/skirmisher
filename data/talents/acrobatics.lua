@@ -82,8 +82,9 @@ newTalent {
     return true
   end,
   info = function(self, t)
-    return ([[Use your opponent as a platform and spring off of them, landing on the target square.
+    return ([[Use your opponent as a platform and spring off of them, landing on the target square and temporarily gaining a burst of speed from the momentum, letting you run in the same direction you vaulted in %d%% faster for 3 turns. Buff ends if you change directions or stop moving.
 
-Not implemented: and temporarily gaining a burst of speed from the momentum, letting you run in the same direction you vaulted in 10%%-50%% (dex) faster for 3 turns. Buff ends if you change directions or stop moving. Can be used on Traps to move past them without triggering.]])
+Not Implemented: Can be used on Traps to move past them without triggering.]])
+      :format(t.speed_bonus(self, t) * 100)
   end,
 }
