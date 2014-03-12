@@ -140,7 +140,12 @@ newTalent {
     return self:combatTalentWeaponDamage(t, 0.5, 0.75)
   end,
   archery_onhit = function(self, t, target, x, y)
-    -- This is going to be harder than I thought.
+    if target:canBe("stun") then
+      target:setEffect(target.EFF_SKIRMISHER_STUN_INCREASE, 1, {
+                         apply_power = self:combatAttack()})
+    else
+      game.logSeen(target, "%s resists the stunning shot!", target.name:capitalize())
+    end
   end,
   action = function(self, t)
     local targets = self:archeryAcquireTargets(nil, {limit_shots = 1, multishots = 3})
@@ -149,7 +154,7 @@ newTalent {
     return true
   end,
   info = function(self, t)
-    return ([[Apply directly to the forehead! Shoot 3 quick sling bullets for %d%% damage in succession into your opponent’s brow. For each bullet that hits, they are stunned for 1 turn.]])
+    return ([[Apply directly to the forehead! Shoot 3 quick sling bullets for %d%% damage in succession into your opponent’s brow. Each bullet will increase the target's stun duration by 1.]])
       :format(t.damage_multiplier(self, t) * 100)
   end,
 }

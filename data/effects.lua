@@ -85,3 +85,28 @@ newEffect {
       :format(eff.move_speed_bonus * 100)
   end,
 }
+
+-- If they don't have stun, stun them. If they do, increase its
+-- duration.
+newEffect {
+  name = "SKIRMISHER_STUN_INCREASE",
+  desc = "Stun Lengthen",
+  type = "physical",
+  subtype = {stun = true},
+  status = "detrimental",
+  on_gain = function(self, eff)
+    local stun = self:hasEffect(self.EFF_STUNNED)
+    if stun and stun.dur and stun.dur > 1 then
+      return ("#Target# is stunned further! (now %d turns)"):format(stun.dur), "Stun Lengthened"
+    end
+  end,
+  activate = function(self, eff)
+    local stun = self:hasEffect(self.EFF_STUNNED)
+    if stun then
+      stun.dur = stun.dur + eff.dur
+    else
+      self:setEffect(self.EFF_STUNNED, eff.dur, {})
+    end
+    self:removeEffect(self.EFF_SKIRMISHER_STUN_INCREASE)
+  end,
+}
