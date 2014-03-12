@@ -30,7 +30,7 @@ newTalent {
   mode = "passive",
   
   chance = function(self, t)
-    return 10 + self:getDex(1.0, true) * self:combatTalentScale(t, 0, 20)
+    return util.bound(self:getTalentLevel(t)*5, 0, 40);
   end,
   -- called by _M:combatArmorHardiness
   getHardiness = function(self, t)
@@ -45,7 +45,7 @@ newTalent {
     local block = t.chance(self, t)
     local armor = t.getHardiness(self, t)
 		return ([[Allows shields to be equipped, regardless of normal stat or talent requirements.
-			When you are attacked in melee, you have a %d%% chance to deflect the attack with your shield, completely evading it. The chance scales with your Dexterity.]])
+			When you are attacked in melee, you have a %d%% chance to deflect the attack with your shield, completely evading it.]])
       :format(block, armor)
 	end,
 }
