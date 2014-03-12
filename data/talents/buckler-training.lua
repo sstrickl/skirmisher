@@ -49,3 +49,86 @@ newTalent {
       :format(block, armor)
 	end,
 }
+
+newTalent{
+  short_name = "SKIRMISHER_BASH_AND_SMASH",
+  name = "Bash and Smash",
+  type = {"technique/buckler-training", 2},
+  require = lowReqGen('dex', 2),
+  points = 5,
+  random_ego = "attack",
+  cooldown = 8,
+  stamina = 15,
+	requires_target = true,
+  tactical = { ATTACK = 2, ESCAPE = { knockback = 1 }, DISABLE = { knockback = 1 } },
+  
+  on_pre_use = function(self, t, silent)
+    if not self:hasShield() or not self:hasArcheryWeapon() then
+      if not silent then game.logPlayer(self, "You require a ranged weapon and a shield to use this talent.") end
+      return false
+    end
+    return true
+  end,
+  
+  getDist = function(self, t)
+    if self:getTalentLevel(t) >= 3 then
+      return 3
+    else
+      return 2
+    end
+  end,
+  getShieldMult = function(self, t)
+    return self:combatTalentWeaponDamage(t, 1, 2)
+  end,
+  getSlingMult = function(self, t)
+    return self:combatTalentWeaponDamage(t, 1.5, 3)
+  end,
+  
+  action = function(self, t)
+    local shield = self:hasShield()
+    local sling = self:hasArcheryWeapon()
+    if not shield or not sling then
+      game.logPlayer(self, "You require a ranged weapon and a shield to use this talent.")
+      return nil
+    end
+
+    local tg = {type="hit", range=self:getTalentRange(t)}
+    local x, y, target = self:getTarget(tg)
+    if not x or not y or not target then return nil end
+    if core.fov.distance(self.x, self.y, x, y) > 1 then return nil end
+
+    -- First attack with shield
+    local speed, hit = self:attackTargetWith(target, shield.special_combat, nil, t.getShieldMult(self, t))
+    -- At talent levels >= 5, attack twice
+    if self:getTalentLevel(t) >= 5 then
+      local speed, hit = self:attackTargetWith(target, shield.special_combat, nil, t.getShieldMult(self, t))
+    end
+
+		-- Knockback
+		if hit then
+      if target:canBe("knockback") then
+        local dist = t.getDist(self, t)
+        target:knockback(self.x, self.y, dist)
+			else
+        game.logSeen(target, "%s resists the knockback!", target.name:capitalize())
+      end
+    end
+    
+    -- Ranged attack
+    local targets = self:archeryAcquireTargets(nil, {one_shot=true, x=target.x, y=target.y})
+    if targets then
+      --game.logSeen(self, "%s follows up with a shot from %s!", self.name:capitalize(), sling:getName())
+      self:archeryShoot(targets, t, nil, {mult=t.getSlingMult(self, t)})
+    end
+
+    return true
+	end,
+  info = function(self, t)
+    local shieldMult = t.getShieldMult(self, t) * 100
+    local tiles = t.getDist(self, t)
+    local slingMult = t.getSlingMult(self, t) * 100
+    return ([[Bash an enemy in melee range with your shield, doing %d%% damage and knocking back %d squares. You follow with a deadly short-range sling attack, dealing %d%% damage.
+		At talent level 5, you will strike with your shield twice.]])
+		:format(shieldMult, tiles, slingMult)
+	end,
+}
