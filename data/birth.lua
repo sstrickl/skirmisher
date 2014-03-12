@@ -36,7 +36,7 @@ newBirthDescriptor{
     ["cunning/trapping"]={false, 0.1},
 
     -- generic
-    ["cunning/acrobatics"]={true, 0.3},
+    ["technique/acrobatics"]={true, 0.3},
     ["cunning/survival"]={true, 0.3},
     ["technique/combat-training"]={true, 0.3},
     ["technique/field-control"]={false, 0.1},
