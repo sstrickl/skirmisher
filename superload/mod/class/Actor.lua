@@ -14,9 +14,12 @@
 -- along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 require "engine.class"
+require "engine.interface.ActorProject"
+local Map = require "engine.Map"
 
 local _M = loadPrevious(...)
 local base_canWearObject = _M.canWearObject
+local base_projectDoStop = _M.projectDoStop
 
 function _M:canWearObject(o, try_slot)
   if o.subtype == "shield" and self:knowTalent(self.T_SKIRMISHER_BUCKLER_EXPERTISE) then
@@ -48,6 +51,18 @@ function _M:canWearObject(o, try_slot)
   else
     return base_canWearObject(self, o, try_slot)
   end
+end
+
+function _M:projectDoStop(typ, tg, damtype, dam, particles, lx, ly, tmp, rx, ry, projectile)
+  local target = game.level.map:call(lx, ly, Map.ACTOR)
+  print("[SKIRMISHER] using modified projectDoStop");
+  if target and target.getTalentFromId and target ~= projectile.src then
+    if target:knowTalent(target.T_SKIRMISHER_BUCKLER_MASTERY) then
+      local t = target:getTalentFromId(target.T_SKIRMISHER_BUCKLER_MASTERY)
+      lx, ly = t.offsetTarget(target, t, lx, ly)
+    end
+  end
+  return base_projectDoStop(self, typ, tg, damtype, dam, particles, lx, ly, tmp, rx, ry, projectile)
 end
 
 -- Directed Speed will be cancelled by non-movement actions.

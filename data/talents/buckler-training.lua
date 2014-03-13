@@ -97,11 +97,25 @@ newTalent{
     if not x or not y or not target then return nil end
     if core.fov.distance(self.x, self.y, x, y) > 1 then return nil end
 
+    local autocrit = false
+    if self:knowTalent(self.T_SKIRMISHER_BUCKLER_MASTERY) then
+      local t2 = self:getTalentFromId(self.T_SKIRMISHER_BUCKLER_MASTERY)
+      if self:getTalentLevel(t2) >= 5 then
+        autocrit = true
+      end
+    end
+    
+    if autocrit then
+      self.combat_physcrit = self.combat_physcrit + 1000
+    end
     -- First attack with shield
     local speed, hit = self:attackTargetWith(target, shield.special_combat, nil, t.getShieldMult(self, t))
     -- At talent levels >= 5, attack twice
     if self:getTalentLevel(t) >= 5 then
       local speed, hit = self:attackTargetWith(target, shield.special_combat, nil, t.getShieldMult(self, t))
+    end
+    if autocrit then
+      self.combat_physcrit = self.combat_physcrit - 1000
     end
 
 		-- Knockback
@@ -130,5 +144,55 @@ newTalent{
     return ([[Bash an enemy in melee range with your shield, doing %d%% damage and knocking back %d squares. You follow with a deadly short-range sling attack, dealing %d%% damage.
 		At talent level 5, you will strike with your shield twice.]])
 		:format(shieldMult, tiles, slingMult)
+	end,
+}
+
+newTalent {
+  short_name = "SKIRMISHER_BUCKLER_MASTERY",
+  name = "Buckler Mastery",
+  type = {"technique/buckler-training", 3},
+  require = lowReqGen('dex', 3),
+  points = 5,
+  mode = "passive",
+  
+  -- called in ActorProject (ughhh why isn't this a callback)
+  offsetTarget = function(self, t, x, y)
+    local x2 = x
+    local y2 = y
+    if rng.percent(t.getChance(self, t)) then
+      local spread = t.getRange(self, t)
+      x2 = x2 + rng.range(-spread, spread)
+      y2 = y2 + rng.range(-spread, spread)
+      local dir = game.level.map:compassDirection(x2-x, y2-y)
+      if not dir then
+        dir = "but fumbles!"
+      else
+        dir = "to the "..dir.."!"
+      end
+      self:logCombat(who, "#Source# blocks the projectile and deflects it %s", dir)
+    end
+    return x2, y2
+  end,
+  getChance = function(self, t)
+    return util.bound(self:getTalentLevel(t)*7.5, 0, 50)
+  end,
+  getRange = function(self, t)
+    return util.bound(self:getTalentLevel(t) / 2, 1, 5)
+  end,
+
+  info = function(self, t)
+    local chance = t.getChance(self, t)
+    local range = t.getRange(self, t)
+    local crit = ""
+    local t2 = self:getTalentFromId(self.T_SKIRMISHER_BASH_AND_SMASH)
+    if t2 then
+      if self:getTalentLevel(t2) >= 5 then
+        crit = " At talent level 5, your Bash and Smash shield hits are guaranteed criticals."
+      else
+        crit = " At talent level 5, your Bash and Smash shield hit is a guaranteed critical."
+      end
+    end
+		return ([[When you are hit by a projectile, physical or otherwise, you have a %d%% chance to deflect it up to %d squares away.%s]])
+      :format(chance, range, crit)
 	end,
 }

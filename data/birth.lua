@@ -50,6 +50,7 @@ newBirthDescriptor{
     [ActorTalents.T_SHOOT] = 1,
     [ActorTalents.T_SKIRMISHER_SLING_SUPREMACY] = 1,
     [ActorTalents.T_SKIRMISHER_KNEECAPPER] = 1,
+    [ActorTalents.T_SKIRMISHER_BASH_AND_SMASH] = 1,
   },
   copy = {
     resolvers.equip{
