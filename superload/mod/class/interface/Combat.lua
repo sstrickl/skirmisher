@@ -35,6 +35,7 @@ function _M:attackTargetWith(target, weapon, damtype, mult, force_dam)
     if t.shouldEvade(target, t) then
       game.logSeen(target, "%s deflects the attack.", target.name:capitalize())
       print("[SKIRMISHER] attack evaded")
+      t.onEvade(target, t, self)
       return self:combatSpeed(weapon), false
     end
   end

@@ -36,9 +36,15 @@ newTalent {
   getHardiness = function(self, t)
     return 0 --self:getTalentLevel(t) * 4;
   end,
-  
+  -- called by Combat.attackTargetWith
   shouldEvade = function(self, t)
     return rng.percent(t.chance(self, t)) and self:hasShield() and not self:hasHeavyArmor()
+  end,
+  onEvade = function(self, t, target)
+    if self:isTalentActive(self.T_SKIRMISHER_COUNTER_SHOT) and target then
+      local t2 = self:getTalentFromId(self.T_SKIRMISHER_COUNTER_SHOT)
+      t2.doCounter(self, t2, target)
+    end
   end,
 
 	info = function(self, t)
@@ -50,7 +56,7 @@ newTalent {
 	end,
 }
 
-newTalent{
+newTalent {
   short_name = "SKIRMISHER_BASH_AND_SMASH",
   name = "Bash and Smash",
   type = {"technique/buckler-training", 2},
@@ -156,10 +162,10 @@ newTalent {
   mode = "passive",
   
   -- called in ActorProject (ughhh why isn't this a callback)
-  offsetTarget = function(self, t, x, y)
+  offsetTarget = function(self, t, x, y, projectile)
     local x2 = x
     local y2 = y
-    if rng.percent(t.getChance(self, t)) then
+    if rng.percent(t.getChance(self, t)) and self:hasShield() and not self:hasHeavyArmor() then
       local spread = t.getRange(self, t)
       x2 = x2 + rng.range(-spread, spread)
       y2 = y2 + rng.range(-spread, spread)
@@ -170,6 +176,10 @@ newTalent {
         dir = "to the "..dir.."!"
       end
       self:logCombat(who, "#Source# blocks the projectile and deflects it %s", dir)
+      if self:isTalentActive(self.T_SKIRMISHER_COUNTER_SHOT) and projectile.src then
+        local t2 = self:getTalentFromId(self.T_SKIRMISHER_COUNTER_SHOT)
+        t2.doCounter(self, t2, projectile.src)
+      end
     end
     return x2, y2
   end,
@@ -195,4 +205,71 @@ newTalent {
 		return ([[When you are hit by a projectile, physical or otherwise, you have a %d%% chance to deflect it up to %d squares away.%s]])
       :format(chance, range, crit)
 	end,
+}
+
+newTalent {
+  short_name = "SKIRMISHER_COUNTER_SHOT",
+  name = "Counter Shot",
+  type = {"technique/buckler-training", 4},
+  mode = "sustained",
+  points = 5,
+  cooldown = 10,
+  sustain_stamina = 0,
+  no_energy = true,
+  require = lowReqGen('dex', 4),
+  tactical = { BUFF = 2 },
+  
+  on_pre_use = function(self, t, silent)
+    if not self:hasShield() or not self:hasArcheryWeapon() then
+      if not silent then game.logPlayer(self, "You require a ranged weapon and a shield to use this talent.") end
+      return false
+    end
+    return true
+  end,
+  activate = function(self, t)
+    return {}
+  end,
+  deactivate = function(self, t, p)
+    return true
+  end,
+  getStaminaPerShot = function(self, t)
+    return 10
+  end,
+  getMult = function(self, t)
+    return self:combatTalentScale(t, .9, 1.6)
+  end,
+  -- called from the relevant buckler talents
+  doCounter = function(self, t, target)
+    local sling = self:hasArcheryWeapon()
+    local stamina = t.getStaminaPerShot(self, t)
+    if not sling or self.stamina < stamina then
+      return false
+    end
+    local targets = self:archeryAcquireTargets(nil, {one_shot=true, x=target.x, y=target.y})
+    if targets then
+      --self:logCombat(who, "#Source# follows up with a countershot.")
+      self:incStamina(-stamina)
+      
+      local autocrit = false
+      if self:getTalentLevel(t) >= 5 then
+        autocrit = true
+      end
+      
+      if autocrit then
+        self.combat_physcrit = self.combat_physcrit + 1000
+      end
+      self:archeryShoot(targets, t, nil, {mult=t.getMult(self, t)})
+      if autocrit then
+        self.combat_physcrit = self.combat_physcrit - 1000
+      end
+    end
+  end,
+  
+  info = function(self, t)
+    local mult = t.getMult(self, t) * 100
+    local stamina = t.getStaminaPerShot(self, t)
+    return ([[Any time you block an attack with Buckler Expertise or Buckler Mastery you instantly counterattack with your sling for %d%% damage at the cost of %d stamina.
+			At talent level 5, your Counter Shot is a guaranteed critical.]])
+      :format(mult, stamina)
+  end,
 }

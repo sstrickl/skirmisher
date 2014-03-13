@@ -24,7 +24,7 @@ function _M:on_move(x, y, target)
   if target.getTalentFromId and target ~= self.src then
     if target:knowTalent(T_SKIRMISHER_BUCKLER_MASTERY) then
       local t = target:getTalentFromId(target.T_SKIRMISHER_BUCKLER_MASTERY)
-      --x, y = t.offsetTarget(target, t, x, y)
+      --x, y = t.offsetTarget(target, t, x, y, self)
     end
   end
   base_onMove(self, x, y, target)

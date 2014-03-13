@@ -59,7 +59,7 @@ function _M:projectDoStop(typ, tg, damtype, dam, particles, lx, ly, tmp, rx, ry,
   if target and target.getTalentFromId and target ~= projectile.src then
     if target:knowTalent(target.T_SKIRMISHER_BUCKLER_MASTERY) then
       local t = target:getTalentFromId(target.T_SKIRMISHER_BUCKLER_MASTERY)
-      lx, ly = t.offsetTarget(target, t, lx, ly)
+      lx, ly = t.offsetTarget(target, t, lx, ly, projectile)
     end
   end
   return base_projectDoStop(self, typ, tg, damtype, dam, particles, lx, ly, tmp, rx, ry, projectile)
