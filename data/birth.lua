@@ -33,6 +33,7 @@ newBirthDescriptor{
     ["technique/skirmisher-slings"]={true, 0.3},
     ["technique/buckler-training"]={true, 0.3},
     ["cunning/called-shots"]={true, 0.3},
+    ["technique/tireless-combatant"]={true, 0.3},
     ["cunning/trapping"]={false, 0.1},
 
     -- generic
