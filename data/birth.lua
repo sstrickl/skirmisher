@@ -49,13 +49,14 @@ newBirthDescriptor{
     [ActorTalents.T_WEAPON_COMBAT] = 1,
     [ActorTalents.T_SHOOT] = 1,
     [ActorTalents.T_SKIRMISHER_SLING_SUPREMACY] = 1,
-    [ActorTalents.T_SKIRMISHER_KNEECAPPER] = 1,
+    [ActorTalents.T_SKIRMISHER_BUCKLER_EXPERTISE] = 1,
   },
   copy = {
     resolvers.equip{
       id=true,
       {type="armor", subtype="light", name="rough leather armour", autoreq=true,ego_chance=-1000},
       {type="weapon", subtype="sling", name="rough leather sling", autoreq=true, ego_chance=-1000},
+			{type="armor", subtype="shield", name="iron shield", autoreq=false, ego_chance=-1000, ego_chance=-1000},
       {type="ammo", subtype="shot", name="pouch of iron shots", autoreq=true, ego_chance=-1000},
     },
   },
