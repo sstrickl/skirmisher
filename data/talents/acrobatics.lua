@@ -29,7 +29,7 @@ newTalent {
   points = 5,
   random_ego = "attack",
   cooldown = function(self, t) return 25 end,
-  stamina = 14,
+  stamina = staminaCost(14),
   tactical = {ESCAPE = 2},
   on_pre_use = function(self, t)
     return not self:attr("never_move")

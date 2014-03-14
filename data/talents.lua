@@ -53,6 +53,19 @@ damDesc = function(self, type, dam)
 	return dam
 end
 
+-- There's no good way to globally reduce stamina (or any other resource cost..)
+-- skirmisher workaround: use this for all stamina costs functions
+staminaCost = function(cost)
+  return function(self, t)
+    local newCost = cost
+    if self:isTalentActive(self.T_SKIRMISHER_PACE_YOURSELF) then
+      local t2 = self:getTalentFromId(self.T_SKIRMISHER_PACE_YOURSELF)
+      newCost = newCost * (100 - t2.getReduction(self, t2)) / 100
+    end
+    return newCost
+  end
+end
+
 -- Archery range talents
 archery_range = function(self, t)
 	local weapon, ammo, offweapon = self:hasArcheryWeapon()
