@@ -47,6 +47,7 @@ end
 newTalent {
   short_name = "SKIRMISHER_SLING_SUPREMACY",
   name = "Sling Supremacy",
+  image = "talents/sling_mastery.png",
   type = {"technique/skirmisher-slings", 1},
   require = { stat = { dex=function(level) return 12 + level * 6 end }, },
   points = 5,
