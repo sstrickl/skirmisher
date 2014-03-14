@@ -51,6 +51,8 @@ newBirthDescriptor{
     [ActorTalents.T_SHOOT] = 1,
     [ActorTalents.T_SKIRMISHER_SLING_SUPREMACY] = 1,
     [ActorTalents.T_SKIRMISHER_BUCKLER_EXPERTISE] = 1,
+    
+    [ActorTalents.T_SKIRMISHER_THE_ETERNAL_WARRIOR] = 1,
   },
   copy = {
     resolvers.equip{

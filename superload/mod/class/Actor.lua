@@ -20,11 +20,13 @@ local Map = require "engine.Map"
 local _M = loadPrevious(...)
 local base_canWearObject = _M.canWearObject
 local base_projectDoStop = _M.projectDoStop
+local base_incStamina = _M.incStamina
 
+-- Remove shield reqs if you know buckler stuff
 function _M:canWearObject(o, try_slot)
   if o.subtype == "shield" and self:knowTalent(self.T_SKIRMISHER_BUCKLER_EXPERTISE) then
     print("[SKIRMISHER] Using skirmisher shield check")
-    -- we still have to do checks on the slot
+    -- we still have to do checks on the slot, copy/pasted mostly
     
     -- Check forbidden slot
     if o.slot_forbid then
@@ -53,6 +55,7 @@ function _M:canWearObject(o, try_slot)
   end
 end
 
+-- This seems like the only reasonable place to do projectile deflection
 function _M:projectDoStop(typ, tg, damtype, dam, particles, lx, ly, tmp, rx, ry, projectile)
   local target = game.level.map:call(lx, ly, Map.ACTOR)
   print("[SKIRMISHER] using modified projectDoStop");
@@ -63,6 +66,16 @@ function _M:projectDoStop(typ, tg, damtype, dam, particles, lx, ly, tmp, rx, ry,
     end
   end
   return base_projectDoStop(self, typ, tg, damtype, dam, particles, lx, ly, tmp, rx, ry, projectile)
+end
+
+-- Trigger Eternal Warrior on stamina spend
+function _M:incStamina(stamina)
+  print("[SKIRMISHER] using modified incStamina")
+  if self:knowTalent(self.T_SKIRMISHER_THE_ETERNAL_WARRIOR) then
+    local t = self:getTalentFromId(self.T_SKIRMISHER_THE_ETERNAL_WARRIOR)
+    t.onIncStamina(self, t, stamina)
+  end
+  base_incStamina(self, stamina)
 end
 
 -- Directed Speed will be cancelled by non-movement actions.

@@ -110,3 +110,42 @@ newEffect {
     self:removeEffect(self.EFF_SKIRMISHER_STUN_INCREASE)
   end,
 }
+
+newEffect {
+  name = "SKIRMISHER_ETERNAL_WARRIOR",
+  desc = "Eternal Warrior",
+  type = "mental",
+	subtype = { morale=true },
+	status = "beneficial",
+  parameters = {
+    -- Resist all increase
+    res=.5,
+    -- Resist caps increase
+    cap=.5,
+    -- Maximum stacking applications
+    max=5 },
+  on_gain = function(self, err) return nil, "+Eternal Warrior" end,
+  on_lose = function(self, err) return nil, "-Eternal Warrior" end,
+	
+	long_desc = function(self, eff)
+    return ("The target stands strong, increasing all resistances %0.1f%% and resistance caps by %0.1f%%."):
+      format(eff.res, eff.cap)
+  end,
+  activate = function(self, eff)
+    eff.res_id = self:addTemporaryValue("resists", {all = eff.res})
+    eff.cap_id = self:addTemporaryValue("resists_cap", {all = eff.cap})
+  end,
+  on_merge = function(self, old_eff, new_eff)
+    self:removeTemporaryValue("resists", old_eff.res_id)
+		self:removeTemporaryValue("resists_cap", old_eff.cap_id)
+    new_eff.res = math.min(new_eff.res + old_eff.res, new_eff.res * new_eff.max)
+    new_eff.cap = math.min(new_eff.cap + old_eff.cap, new_eff.cap * new_eff.max)
+    new_eff.res_id = self:addTemporaryValue("resists", {all = new_eff.res})
+    new_eff.cap_id = self:addTemporaryValue("resists_cap", {all = new_eff.cap})
+    return new_eff
+  end,
+  deactivate = function(self, eff)
+    self:removeTemporaryValue("resists", eff.res_id)
+    self:removeTemporaryValue("resists_cap", eff.cap_id)
+  end,
+}

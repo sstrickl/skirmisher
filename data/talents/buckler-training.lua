@@ -148,8 +148,8 @@ newTalent {
     local tiles = t.getDist(self, t)
     local slingMult = t.getSlingMult(self, t) * 100
     return ([[Bash an enemy in melee range with your shield, doing %d%% damage and knocking back %d squares. You follow with a deadly short-range sling attack, dealing %d%% damage.
-		At talent level 5, you will strike with your shield twice.]])
-		:format(shieldMult, tiles, slingMult)
+			At talent level 5, you will strike with your shield twice.]])
+      :format(shieldMult, tiles, slingMult)
 	end,
 }
 

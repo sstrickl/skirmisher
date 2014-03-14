@@ -29,7 +29,15 @@ newTalent {
   points = 5,
   
   getRestoreRate = function(self, t)
-    return 1.5 * self:getTalentLevel(t)
+    return t.applyMult(self, t, 1.5 * self:getTalentLevel(t))
+  end,
+  applyMult = function(self, t, gain)
+    if self:knowTalent(self.T_SKIRMISHER_THE_ETERNAL_WARRIOR) then
+      local t2 = self:getTalentFromId(self.T_SKIRMISHER_THE_ETERNAL_WARRIOR)
+      return gain * t2.getMult(self, t2)
+    else
+      return gain
+    end
   end,
   callbackOnAct = function(self, t)
     
@@ -115,10 +123,18 @@ newTalent {
   points = 5,
   
   getStaminaRate = function(self, t)
-    return .5 * self:getTalentLevel(t)
+    return t.applyMult(self, t, .5 * self:getTalentLevel(t))
   end,
   getLifeRate = function(self, t)
-    return 1 * self:getTalentLevel(t)
+    return t.applyMult(self, t, 1 * self:getTalentLevel(t))
+  end,
+  applyMult = function(self, t, gain)
+    if self:knowTalent(self.T_SKIRMISHER_THE_ETERNAL_WARRIOR) then
+      local t2 = self:getTalentFromId(self.T_SKIRMISHER_THE_ETERNAL_WARRIOR)
+      return gain * t2.getMult(self, t2)
+    else
+      return gain
+    end
   end,
   callbackOnAct = function(self, t)
     
@@ -156,5 +172,60 @@ newTalent {
     local health = t.getLifeRate(self, t)
     return ([[When the going gets tough, you get tougher. You gain %0.1f Stamina regen per enemy in sight, and beginning at talent level 3, you also gain %0.1f life regen per enemy. The bonuses cap at 4 enemies.]])
       :format(stamina, health)
+  end,
+}
+    
+newTalent {
+  short_name = "SKIRMISHER_THE_ETERNAL_WARRIOR",
+  name = "The Eternal Warrior",
+  type = {"technique/tireless-combatant", 4},
+  require = lowReqGen("wil", 4),
+  mode = "passive",
+  points = 5,
+  
+  getResist = function(self, t)
+    return .5 * self:getTalentLevel(t)
+  end,
+  getResistCap = function(self, t)
+    return .5 * self:getTalentLevel(t)
+  end,
+  getDuration = function(self, t)
+    return 3
+  end,
+  getMax = function(self, t)
+    return 5
+  end,
+  getMult = function(self, t, fake)
+    if self:getTalentLevel(t) >= 5 or fake then
+      return 1.2
+    else
+      return 1
+    end
+  end,
+  
+  -- call from incStamina whenever stamina is incremented or decremented
+  onIncStamina = function(self, t, delta)
+    if delta < 0 and not self.temp_skirmisherSpentThisTurn then
+      self:setEffect(self.EFF_SKIRMISHER_ETERNAL_WARRIOR, t.getDuration(self, t), {
+        res = t.getResist(self, t),
+        cap = t.getResistCap(self, t),
+        max = t.getMax(self, t),
+      })
+      self.temp_skirmisherSpentThisTurn = true
+    end
+  end,
+  callbackOnAct = function(self, t)
+    self.temp_skirmisherSpentThisTurn = false
+  end,
+  
+  info = function(self, t)
+    local max = t.getMax(self, t)
+    local duration = t.getDuration(self, t)
+    local resist = t.getResist(self, t)
+    local cap = t.getResistCap(self, t)
+    local mult = (t.getMult(self, t, true) - 1) * 100
+    return ([[For each turn you spend stamina, you gain %0.1f%% resist all and %0.1f%% resistances cap for %d turns. The buff stacks up to %d times, and each new application refreshes the duration.
+			Additionally, at talent level 5, Breathing Room and Dauntless Challenger are %d%% more effective.]])
+      :format(resist, cap, duration, max, mult)
   end,
 }
