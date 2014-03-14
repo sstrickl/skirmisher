@@ -176,7 +176,7 @@ newTalent {
     -- Second round of bullets.
     local targets = self:archeryAcquireTargets(tg, {limit_shots = limit_shots})
     if not targets then
-      game.target_forced = old_target_forced
+      game.target.forced = old_target_forced
       return true
     end
     self:archeryShoot(targets, t, nil, params)
