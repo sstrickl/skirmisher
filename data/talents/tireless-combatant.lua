@@ -34,14 +34,14 @@ newTalent {
   callbackOnAct = function(self, t, moved, force, ox, oy)
     
     -- Remove the existing regen rate
-    if t.staminaID then
-      self:removeTemporaryValue("stamina_regen", t.staminaID)
+    if self.temp_skirmisherBreathingStamina then
+      self:removeTemporaryValue("stamina_regen", self.temp_skirmisherBreathingStamina)
     end
-    if t.lifeID then
-      self:removeTemporaryValue("life_regen", t.lifeID)
+    if self.temp_skirmisherBreathingLife then
+      self:removeTemporaryValue("life_regen", self.temp_skirmisherBreathingLife)
     end
-    t.staminaID = nil
-    t.lifeID = nil
+    self.temp_skirmisherBreathingStamina = nil
+    self.temp_skirmisherBreathingLife = nil
 
     -- Calculate surrounding enemies
     local nb_foes = 0
@@ -54,9 +54,9 @@ newTalent {
     
     -- Add new regens if needed
     if nb_foes == 0 then
-      t.staminaID = self:addTemporaryValue("stamina_regen", t.getRestoreRate(self, t))
+      self.temp_skirmisherBreathingStamina = self:addTemporaryValue("stamina_regen", t.getRestoreRate(self, t))
       if self:getTalentLevel(t) >= 3 then
-        t.lifeID = self:addTemporaryValue("life_regen", t.getRestoreRate(self, t))
+        self.temp_skirmisherBreathingLife = self:addTemporaryValue("life_regen", t.getRestoreRate(self, t))
       end
     end
     
