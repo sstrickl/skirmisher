@@ -191,3 +191,88 @@ newTalent {
               t.damage_multiplier(self, t) * 100)
   end,
 }
+
+-- Hack into shoot for the bombardment sustain.
+local shoot = Talents:getTalentFromId("T_SHOOT")
+local old_shoot_action = shoot.action
+shoot.action = function(self, t)
+  -- Most of the time use the old shoot.
+  if not sling_equipped(self) or
+    not self:isTalentActive("T_SKIRMISHER_BOMBARDMENT")
+  then
+    return old_shoot_action(self, t)
+  end
+
+  -- Bombardment.
+  local bombardment = self:getTalentFromId("T_SKIRMISHER_BOMBARDMENT")
+  local shots = bombardment.bullet_count(self, bombardment)
+
+  -- Do targeting.
+  local old_target_forced = game.target.forced
+  local tg = {
+    type = "bolt",
+    range = archery_range(self),
+    talent = t
+  }
+  local x, y, target = self:getTarget(tg)
+  game.target.forced = {x, y, target}
+
+  -- Fire all shots.
+  local i
+  for i = 1, shots do
+    local targets = self:archeryAcquireTargets(nil, {one_shot=true})
+    if not targets then break end
+    self:archeryShoot(targets, t, nil, {use_psi_archery = t.use_psi_archery(self, t)})
+  end
+
+  game.target.forced = old_target_forced
+
+  return i ~= 1
+end
+local old_shoot_stamina = shoot.stamina or 0
+shoot.stamina = function(self, t)
+  if not sling_equipped(self) or
+    not self:isTalentActive("T_SKIRMISHER_BOMBARDMENT")
+  then
+    return util.getval(old_shoot_stamina, self, t)
+  end
+
+  local bombardment = self:getTalentFromId("T_SKIRMISHER_BOMBARDMENT")
+  return bombardment.shot_stamina(self, bombardment)
+end
+
+
+newTalent {
+  short_name = "SKIRMISHER_BOMBARDMENT",
+  name = "Bombardment",
+  type = {"technique/skirmisher-slings", 4},
+  require = lowReqGen("dex", 4),
+  points = 5,
+  mode = "sustained",
+  no_energy = true,
+	tactical = { BUFF = 2 },
+	on_pre_use = function(self, t, silent) return sling_equipped(self, silent) end,
+  cooldown = function(self, t)
+    return math.max(0, math.floor(10 - self:getTalentLevel(t)))
+  end,
+  bullet_count = function(self, t)
+    return self:getTalentLevelRaw(t) >= 5 and 3 or 2
+  end,
+  shot_stamina = function(self, t)
+    return self:getTalentLevelRaw(t) >= 3 and 15 or 20
+  end,
+  damage_multiplier = function(self, t)
+    return self:combatTalentWeaponDamage(t, 0.75, 1.0)
+  end,
+  activate = function(self, t) return {} end,
+  deactivate = function(self, t, p) return true end,
+  info = function(self, t)
+    return ([[Your basic Shot talent now fires %d sling bullets for %d%% weapon damage while this is activated, at a cost of %d Stamina per attack.
+
+The 3rd talent point reduces the stamina cost to 15.
+The 5th talent point adds an extra shot.]])
+      :format(t.bullet_count(self, t),
+              t.damage_multiplier(self, t) * 100,
+              t.shot_stamina(self, t))
+  end,
+}
