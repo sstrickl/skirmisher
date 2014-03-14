@@ -68,3 +68,40 @@ newTalent {
       :format(stamina)
   end,
 }
+
+newTalent {
+  short_name = "SKIRMISHER_PACE_YOURSELF",
+  name = "Pace Yourself",
+  type = {"technique/tireless-combatant", 2},
+  mode = "sustained",
+  points = 5,
+  cooldown = 10,
+  sustain_stamina = 0,
+  no_energy = true,
+  require = lowReqGen("wil", 2),
+  tactical = { STAMINA = 2 },
+  random_ego = "utility",
+  
+  activate = function(self, t)
+    return {
+      speed = self:addTemporaryValue("global_speed_add", -t.getSlow(self, t)),
+    }
+  end,
+  deactivate = function(self, t, p)
+    self:removeTemporaryValue("global_speed_add", p.speed)
+    return true
+  end,
+  getSlow = function(self, t)
+    return .125 - self:getTalentLevelRaw(t) * .025
+  end,
+  getReduction = function(self, t)
+    return self:combatTalentScale(t, 15, 35)
+  end,
+  
+  info = function(self, t)
+    local slow = t.getSlow(self, t) * 100
+    local reduction = t.getReduction(self, t)
+    return ([[Control your movements to conserve your energy. While Pace Yourself is activated you are globally slowed by %0.1f%%, but receive a %0.1f%% discount on all Stamina based abilities.]])
+      :format(slow, reduction)
+  end,
+}

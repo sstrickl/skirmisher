@@ -85,7 +85,7 @@ newTalent {
   tactical = {ATTACK = {weapon = 2}},
   range = archery_range,
   cooldown = 5,
-  stamina = 10,
+  stamina = staminaCost(10),
 	on_pre_use = function(self, t, silent) return sling_equipped(self, silent) end,
   getDamage = function(self, t)
     return self:combatTalentWeaponDamage(t, 1.4, 2.4)
@@ -135,7 +135,7 @@ newTalent {
   range = 0,
   radius = archery_range,
   cooldown = 7,
-  stamina = 40,
+  stamina = staminaCost(40),
   target = function(self, t)
     return {
       type = "cone",

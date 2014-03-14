@@ -64,7 +64,7 @@ newTalent {
   points = 5,
   random_ego = "attack",
   cooldown = 8,
-  stamina = 15,
+  stamina = staminaCost(15),
 	requires_target = true,
   tactical = { ATTACK = 2, ESCAPE = { knockback = 1 }, DISABLE = { knockback = 1 } },
   
