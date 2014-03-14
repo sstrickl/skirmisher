@@ -118,7 +118,7 @@ newTalent {
     return .5 * self:getTalentLevel(t)
   end,
   getLifeRate = function(self, t)
-    return 3 * self:getTalentLevel(t)
+    return 1 * self:getTalentLevel(t)
   end,
   callbackOnAct = function(self, t)
     
