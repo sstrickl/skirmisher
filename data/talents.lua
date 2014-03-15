@@ -57,13 +57,16 @@ end
 -- skirmisher workaround: use this for all stamina costs functions
 staminaCost = function(cost)
   return function(self, t)
-    local newCost = cost
-    if self:isTalentActive(self.T_SKIRMISHER_PACE_YOURSELF) then
-      local t2 = self:getTalentFromId(self.T_SKIRMISHER_PACE_YOURSELF)
-      newCost = newCost * (100 - t2.getReduction(self, t2)) / 100
-    end
-    return newCost
+    return applyPace(self, t, cost)
   end
+end
+applyPace = function(self, t, cost)
+  local newCost = cost
+  if self:isTalentActive(self.T_SKIRMISHER_PACE_YOURSELF) then
+    local t2 = self:getTalentFromId(self.T_SKIRMISHER_PACE_YOURSELF)
+    newCost = newCost * (100 - t2.getReduction(self, t2)) / 100
+  end
+  return newCost
 end
 
 -- Archery range talents
