@@ -100,7 +100,7 @@ newTalent {
   cooldown = function(self, t) return 20 end,
   no_energy = true,
   stamina = function(self, t)
-    return math.max(0, 45 - self:getTalentLevel(t) * 5)
+    math.max(0, 45 - self:getTalentLevel(t) * 5)
   end,
   tactical = {ESCAPE = 2, BUFF = 1},
   range = function(self, t)
@@ -140,3 +140,63 @@ newTalent {
 Beginning at rank 3, Cunning Roll doubles your physical critical chance for 1 turn.]])
   end
 }
+
+newTalent {
+  short_name = "SKIRMISHER_TRAINED_REACTIONS",
+  name = "Trained Reactions",
+  type = {"technique/acrobatics", 3},
+  mode = "sustained",
+  points = 5,
+  cooldown = 10,
+  sustain_stamina = 0,
+  require = lowReqGen('dex', 3),
+  tactical = { BUFF = 2 },
+	
+  activate = function(self, t)
+    return {}
+  end,
+  deactivate = function(self, t, p)
+    return true
+  end,
+  getLifeTrigger = function(self, t)
+    return self:combatTalentScale(t, 40, 24)
+  end,
+  getReduction = function(self, t)
+    return self:combatTalentScale(t, 50, 66)
+  end,
+  getTriggerCost = function(self, t)
+    return 15
+  end,
+  -- called by mod/Actor.lua, although it could be a callback one day
+  onHit = function(self, t, damage)
+    local cost = t.getTriggerCost(self, t)
+    if damage > self.max_life * t.getLifeTrigger(self, t) / 100 and self.stamina > cost then
+      -- now to find empty space
+      local nx, ny = util.findFreeGrid(self.x, self.y, 1, true, {[Map.ACTOR]=true})
+      if nx then
+        local ox, oy = self.x, self.y
+        self:move(nx, ny, true)
+        self:setEffect("EFF_SKIRMISHER_DEFENSIVE_ROLL", 1, {reduce = t.getReduction(self, t)})
+        local eff = self:hasEffect("EFF_SKIRMISHER_DEFENSIVE_ROLL")
+        eff.dur = eff.dur - 1
+        self:incStamina(-cost)
+        return damage * (100-t.getReduction(self, t)) / 100
+      end
+    end
+    return damage
+  end,
+  
+  info = function(self, t)
+    local trigger = t.getLifeTrigger(self, t)
+    local reduce = t.getReduction(self, t)
+    local cost = t.getTriggerCost(self, t)
+    return ([[While sustainted, any time you would lose more than %d%% of your life in a single hit, you instead roll out of the way, moving into an adjacent tile and gaining a temporary buff that reduces this damage and all further damage that turn by %d%%.
+			This requires an empty square to move to, costs %d Stamina per roll, and will not trigger if you do not have the Stamina.]])
+      :format(trigger, reduce, cost)
+  end,
+  
+}
+
+
+
+

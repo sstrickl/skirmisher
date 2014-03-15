@@ -21,6 +21,7 @@ local _M = loadPrevious(...)
 local base_canWearObject = _M.canWearObject
 local base_projectDoStop = _M.projectDoStop
 local base_incStamina = _M.incStamina
+local base_onTakeHit = _M.onTakeHit
 
 -- Remove shield reqs if you know buckler stuff
 function _M:canWearObject(o, try_slot)
@@ -76,6 +77,21 @@ function _M:incStamina(stamina)
     t.onIncStamina(self, t, stamina)
   end
   base_incStamina(self, stamina)
+end
+
+-- Reduce damage and trigger for Trained Reactions
+function _M:onTakeHit(value, src, death_note)
+  print("[SKIRMISHER] using modified onTakeHit")
+  local newValue = value
+  if self:attr("incoming_reduce") then
+    newValue = newValue * (100-self:attr("incoming_reduce")) / 100
+  end
+  local finalDamage = base_onTakeHit(self, newValue, src, death_note)
+  if self:knowTalent(self.T_SKIRMISHER_TRAINED_REACTIONS) then
+    local t = self:getTalentFromId(self.T_SKIRMISHER_TRAINED_REACTIONS)
+    finalDamage = t.onHit(self, t, finalDamage)
+  end
+  return finalDamage
 end
 
 -- Directed Speed will be cancelled by non-movement actions.

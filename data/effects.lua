@@ -167,3 +167,26 @@ newEffect {
     self:effectTemporaryValue(eff, "combat_physcrit", eff.combat_physcrit)
   end,
 }
+
+newEffect {
+  name = "SKIRMISHER_DEFENSIVE_ROLL",
+  desc = "Defensive Roll",
+  type = "physical",
+	subtype = {tactic = true},
+	status = "beneficial",
+  parameters = {
+    -- percent of all damage to ignore
+    reduce = 50
+  },
+ 
+  on_gain = function(self, err) return "#Target# rolls to avoid some damage!" end,
+  activate = function(self, eff)
+    -- new temp effect, implemented in Actor.lua
+    self:effectTemporaryValue(eff, "incoming_reduce", eff.reduce)
+  end,
+  
+  long_desc = function(self, eff)
+    return ([[The target is in a defensive roll, ignoring %d%% of all incoming damage.]])
+      :format(eff.reduce)
+  end,
+}
