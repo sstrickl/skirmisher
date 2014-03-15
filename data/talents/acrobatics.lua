@@ -21,6 +21,16 @@ newTalentType {
   description = "For light footed Rogues who prefer flight to fighting fair!",
 }
 
+local cooldown_bonus = function(self)
+  local t = self:getTalentFromId("T_SKIRMISHER_SUPERB_AGILITY")
+  return t.cooldown_bonus(self, t)
+end
+
+local stamina_bonus = function(self)
+  local t = self:getTalentFromId("T_SKIRMISHER_SUPERB_AGILITY")
+  return t.stamina_bonus(self, t)
+end
+
 newTalent {
   short_name = "SKIRMISHER_VAULT",
   name = "Vault",
@@ -28,8 +38,8 @@ newTalent {
   require = lowReqGen("dex", 1),
   points = 5,
   random_ego = "attack",
-  cooldown = function(self, t) return 25 end,
-  stamina = staminaCost(14),
+  cooldown = function(self, t) return 25 - cooldown_bonus(self) end,
+  stamina = function(self, t) return math.max(0, 18 - stamina_bonus(self)) end,
   tactical = {ESCAPE = 2},
   on_pre_use = function(self, t)
     return not self:attr("never_move")
@@ -97,10 +107,10 @@ newTalent {
   require = lowReqGen("dex", 2),
   points = 5,
   random_ego = "attack",
-  cooldown = function(self, t) return 20 end,
+  cooldown = function(self, t) return 20 - cooldown_bonus(self) end,
   no_energy = true,
   stamina = function(self, t)
-    return applyPace(self, t, math.max(0, 45 - self:getTalentLevel(t) * 5))
+    return math.max(0, 45 - self:getTalentLevel(t) * 5 - stamina_bonus(self))
   end,
   tactical = {ESCAPE = 2, BUFF = 1},
   range = function(self, t)
@@ -147,11 +157,12 @@ newTalent {
   type = {"technique/acrobatics", 3},
   mode = "sustained",
   points = 5,
-  cooldown = 10,
+  cooldown = function(self, t) return 10 - cooldown_bonus(self) end,
+  stamina_per_use = function(self, t) return 25 - stamina_bonus(self) end,
   sustain_stamina = 0,
-  require = lowReqGen('dex', 3),
+  require = lowReqGen("dex", 3),
   tactical = { BUFF = 2 },
-	
+
   activate = function(self, t)
     return {}
   end,
@@ -169,23 +180,36 @@ newTalent {
   end,
   -- called by mod/Actor.lua, although it could be a callback one day
   onHit = function(self, t, damage)
+    if self:hasEffect("EFF_SKIRMISHER_TRAINED_REACTIONS_COOLDOWN") then return damage end
     local cost = t.getTriggerCost(self, t)
-    if damage > self.max_life * t.getLifeTrigger(self, t) / 100 and self.stamina > cost then
+    if damage >= self.max_life * t.getLifeTrigger(self, t) * 0.01 then
       -- now to find empty space
       local nx, ny = util.findFreeGrid(self.x, self.y, 1, true, {[Map.ACTOR]=true})
-      if nx then
+      if nx and ny and use_stamina(self, cost) then
         local ox, oy = self.x, self.y
         self:move(nx, ny, true)
+
+        -- Apply cooldown effect.
+        self:setEffect("EFF_SKIRMISHER_TRAINED_REACTIONS_COOLDOWN", t.cooldown(self, t), {})
+
+        -- Apply effect with duration 0.
         self:setEffect("EFF_SKIRMISHER_DEFENSIVE_ROLL", 1, {reduce = t.getReduction(self, t)})
         local eff = self:hasEffect("EFF_SKIRMISHER_DEFENSIVE_ROLL")
         eff.dur = eff.dur - 1
-        self:incStamina(-cost)
+
+        -- Try to apply bonus effect from Superb Agility.
+        local agility = self:getTalentFromId("T_SKIRMISHER_SUPERB_AGILITY")
+        local speed = agility.speed_buff(self, agility)
+        if speed then
+          self:setEffect("EFF_SKIRMISHER_SUPERB_AGILITY", speed.duration, speed)
+        end
+
         return damage * (100-t.getReduction(self, t)) / 100
       end
     end
     return damage
   end,
-  
+
   info = function(self, t)
     local trigger = t.getLifeTrigger(self, t)
     local reduce = t.getReduction(self, t)
@@ -194,9 +218,26 @@ newTalent {
 			This requires an empty square to move to, costs %d Stamina per roll, and will not trigger if you do not have the Stamina.]])
       :format(trigger, reduce, cost)
   end,
-  
+
 }
 
-
-
-
+newTalent {
+  short_name = "SKIRMISHER_SUPERB_AGILITY",
+  name = "Superb Agility",
+  type = {"technique/acrobatics", 4},
+  require = lowReqGen("dex", 4),
+  mode = "passive",
+  points = 5,
+  cooldown_bonus = function(self, t) return math.floor(self:getTalentLevel(t)) end,
+  stamina_bonus = function(self, t) return math.floor(self:getTalentLevel(t) * 3) end,
+  speed_buff = function(self, t)
+    local level = self:getTalentLevel(t)
+    if level >= 5 then return {global_speed_add = 0.2, duration = 2} end
+    if level >= 3 then return {global_speed_add = 0.1, duration = 1} end
+  end,
+  info = function(self, t)
+    return ([[Lowers the cooldown of Vault, Cunning Roll, and Trained Reactions by %d, and their stamina costs by %d. At Rank 3 you also gain 10%% global speed for 1 turn after Trained Reactions activates. At rank 5 this speed bonus becomes 20%% and lasts for 2 rounds]])
+      :format(t.cooldown_bonus(self, t),
+              t.stamina_bonus(self, t))
+  end,
+}

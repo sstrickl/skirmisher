@@ -53,27 +53,23 @@ damDesc = function(self, type, dam)
 	return dam
 end
 
--- There's no good way to globally reduce stamina (or any other resource cost..)
--- skirmisher workaround: use this for all stamina costs functions
-staminaCost = function(cost)
-  return function(self, t)
-    return applyPace(self, t, cost)
-  end
-end
-applyPace = function(self, t, cost)
-  local newCost = cost
-  if self:isTalentActive(self.T_SKIRMISHER_PACE_YOURSELF) then
-    local t2 = self:getTalentFromId(self.T_SKIRMISHER_PACE_YOURSELF)
-    newCost = newCost * (100 - t2.getReduction(self, t2)) / 100
-  end
-  return newCost
-end
-
 -- Archery range talents
 archery_range = function(self, t)
 	local weapon, ammo, offweapon = self:hasArcheryWeapon()
 	if not weapon or not weapon.combat then return 1 end
 	return math.min(weapon.combat.range or 6, offweapon and offweapon.combat and offweapon.combat.range or 40)
+end
+
+-- Use the appropriate amount of stamina. Return false if we don't have enough.
+use_stamina = function(self, cost)
+  cost = cost * (1 + self:combatFatigue() * 0.01)
+  local available = self:getStamina()
+  if self:hasEffect("EFF_ADRENALINE_SURGE") then
+      available = available + self.life
+  end
+  if cost > available then return end
+  self:incStamina(-cost)
+  return true
 end
 
 load("/data-skirmisher/talents/skirmisher-slings.lua")

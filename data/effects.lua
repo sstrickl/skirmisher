@@ -178,15 +178,48 @@ newEffect {
     -- percent of all damage to ignore
     reduce = 50
   },
- 
-  on_gain = function(self, err) return "#Target# rolls to avoid some damage!" end,
+
+  on_gain = function(self, eff) return "#Target# rolls to avoid some damage!" end,
   activate = function(self, eff)
     -- new temp effect, implemented in Actor.lua
     self:effectTemporaryValue(eff, "incoming_reduce", eff.reduce)
   end,
-  
+
   long_desc = function(self, eff)
     return ([[The target is in a defensive roll, ignoring %d%% of all incoming damage.]])
       :format(eff.reduce)
+  end,
+}
+
+newEffect {
+  name = "SKIRMISHER_TRAINED_REACTIONS_COOLDOWN",
+  desc = "Trained Reactions Cooldown",
+  type = "other",
+  subtype = {cooldown = true},
+  status = "detrimental",
+  no_stop_resting = true,
+  on_lose = function(self, eff) return "#LIGHT_BLUE##Target# may dodge again.", "+Trained Reactions" end,
+  long_desc = function(self, eff)
+    return "Trained Reactions may not trigger."
+  end,
+}
+
+newEffect {
+  name = "SKIRMISHER_SUPERB_AGILITY",
+  desc = "Superb Agility",
+  image = "talents/skirmisher_superb_agility.png",
+  type = "physical",
+  subtype = {speed = true},
+	status = "beneficial",
+  parameters = {
+    global_speed_add = 0.1,
+  },
+  on_gain = function(self, eff) return "#Target# has sped up!" end,
+  activate = function(self, eff)
+    self:effectTemporaryValue(eff, "global_speed_add", eff.global_speed_add)
+  end,
+  long_desc = function(self, eff)
+    return ([[The target's reactions have quickened, giving +%d%% global speed.]])
+      :format(eff.global_speed_add * 100)
   end,
 }

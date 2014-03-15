@@ -28,7 +28,7 @@ newTalent {
   points = 5,
   no_unlearn_last = true,
   mode = "passive",
-  
+
   chance = function(self, t)
     return util.bound(self:getTalentLevel(t)*5, 0, 40);
   end,
@@ -64,10 +64,10 @@ newTalent {
   points = 5,
   random_ego = "attack",
   cooldown = 8,
-  stamina = staminaCost(15),
+  stamina = 15,
 	requires_target = true,
   tactical = { ATTACK = 2, ESCAPE = { knockback = 1 }, DISABLE = { knockback = 1 } },
-  
+
   on_pre_use = function(self, t, silent)
     if not self:hasShield() or not self:hasArcheryWeapon() then
       if not silent then game.logPlayer(self, "You require a ranged weapon and a shield to use this talent.") end
@@ -75,7 +75,7 @@ newTalent {
     end
     return true
   end,
-  
+
   getDist = function(self, t)
     if self:getTalentLevelRaw(t) >= 3 then
       return 3
@@ -89,7 +89,7 @@ newTalent {
   getSlingMult = function(self, t)
     return self:combatTalentWeaponDamage(t, 1.5, 3)
   end,
-  
+
   action = function(self, t)
     local shield = self:hasShield()
     local sling = self:hasArcheryWeapon()
@@ -110,7 +110,7 @@ newTalent {
         autocrit = true
       end
     end
-    
+
     if autocrit then
       self.combat_physcrit = self.combat_physcrit + 1000
     end
@@ -133,7 +133,7 @@ newTalent {
         game.logSeen(target, "%s resists the knockback!", target.name:capitalize())
       end
     end
-    
+
     -- Ranged attack
     local targets = self:archeryAcquireTargets(nil, {one_shot=true, x=target.x, y=target.y})
     if targets then
@@ -160,7 +160,7 @@ newTalent {
   require = lowReqGen('dex', 3),
   points = 5,
   mode = "passive",
-  
+
   -- called in ActorProject (ughhh why isn't this a callback)
   offsetTarget = function(self, t, x, y, projectile)
     local x2 = x
@@ -218,7 +218,7 @@ newTalent {
   no_energy = true,
   require = lowReqGen('dex', 4),
   tactical = { BUFF = 2 },
-  
+
   on_pre_use = function(self, t, silent)
     if not self:hasShield() or not self:hasArcheryWeapon() then
       if not silent then game.logPlayer(self, "You require a ranged weapon and a shield to use this talent.") end
@@ -249,12 +249,12 @@ newTalent {
     if targets then
       --self:logCombat(who, "#Source# follows up with a countershot.")
       self:incStamina(-stamina)
-      
+
       local autocrit = false
       if self:getTalentLevelRaw(t) >= 5 then
         autocrit = true
       end
-      
+
       if autocrit then
         self.combat_physcrit = self.combat_physcrit + 1000
       end
@@ -264,7 +264,7 @@ newTalent {
       end
     end
   end,
-  
+
   info = function(self, t)
     local mult = t.getMult(self, t) * 100
     local stamina = t.getStaminaPerShot(self, t)
