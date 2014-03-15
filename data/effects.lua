@@ -114,6 +114,7 @@ newEffect {
 newEffect {
   name = "SKIRMISHER_ETERNAL_WARRIOR",
   desc = "Eternal Warrior",
+  image = "talents/skirmisher_the_eternal_warrior.png",
   type = "mental",
 	subtype = { morale=true },
 	status = "beneficial",
@@ -126,7 +127,7 @@ newEffect {
     max=5 },
   on_gain = function(self, err) return nil, "+Eternal Warrior" end,
   on_lose = function(self, err) return nil, "-Eternal Warrior" end,
-	
+
 	long_desc = function(self, eff)
     return ("The target stands strong, increasing all resistances %0.1f%% and resistance caps by %0.1f%%."):
       format(eff.res, eff.cap)
@@ -147,5 +148,22 @@ newEffect {
   deactivate = function(self, eff)
     self:removeTemporaryValue("resists", eff.res_id)
     self:removeTemporaryValue("resists_cap", eff.cap_id)
+  end,
+}
+
+newEffect {
+  name = "SKIRMISHER_TACTICAL_POSITION",
+  desc = "Tactical Position",
+  type = "physical",
+	subtype = {tactic = true},
+	status = "beneficial",
+  parameters = {combat_physcrit = 10},
+  long_desc = function(self, eff)
+    return ([[The target has relocated to a favorable position, giving them +%d%% physical critical chance.]])
+      :format(eff.combat_physcrit)
+  end,
+  on_gain = function(self, eff) return "#Target# is poised to strike!" end,
+  activate = function(self, eff)
+    self:effectTemporaryValue(eff, "combat_physcrit", eff.combat_physcrit)
   end,
 }

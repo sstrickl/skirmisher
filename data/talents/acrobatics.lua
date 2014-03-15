@@ -47,6 +47,7 @@ newTalent {
     -- Get Landing Point.
     local tg = self:getTalentTarget(t)
     local tx, ty, target = self:getTarget(tg)
+    if core.fov.distance(self.x, self.y, tx, ty) > self:getTalentRange(t) then return end
     if not tx or not ty then return end
     if tx == self.x and ty == self.y then return end
     if target or
@@ -87,4 +88,55 @@ newTalent {
 Not Implemented: Can be used on Traps to move past them without triggering.]])
       :format(t.speed_bonus(self, t) * 100)
   end,
+}
+
+newTalent {
+  short_name = "SKIRMISHER_CUNNING_ROLL",
+  name = "Cunning Roll",
+  type = {"technique/acrobatics", 2},
+  require = lowReqGen("dex", 2),
+  points = 5,
+  random_ego = "attack",
+  cooldown = function(self, t) return 20 end,
+  no_energy = true,
+  stamina = function(self, t)
+    return math.max(0, 45 - self:getTalentLevel(t) * 5)
+  end,
+  tactical = {ESCAPE = 2, BUFF = 1},
+  range = function(self, t)
+    return 2 + math.floor(self:getTalentLevel(t) / 6)
+  end,
+  target = function(self, t)
+    return {type="beam", range=self:getTalentRange(t), talent=t}
+  end,
+  combat_physcrit = function(self, t)
+    if self:getTalentLevel(t) >= 3 then
+      return self:combatCrit()
+    end
+  end,
+  action = function(self, t)
+    local tg = self:getTalentTarget(t)
+    local x, y, target = self:getTarget(tg)
+    if not x or not y then return end
+    if self.x == x and self.y == y then return end
+    if core.fov.distance(self.x, self.y, x, y) > self:getTalentRange(t) then return end
+    if target or game.level.map:checkEntity(tx, ty, Map.TERRAIN, "block_move", self) then
+      game.logPlayer(self, "You must have an empty space to roll to.")
+    end
+
+    self:move(x, y, true)
+    local combat_physcrit = t.combat_physcrit(self, t)
+    if combat_physcrit then
+      -- Can't set to 0 duration directly, so set to 1 and then decrease by 1.
+      self:setEffect("EFF_SKIRMISHER_TACTICAL_POSITION", 1, {combat_physcrit = combat_physcrit})
+      local eff = self:hasEffect("EFF_SKIRMISHER_TACTICAL_POSITION")
+      eff.dur = eff.dur - 1
+    end
+
+    return true
+  end,
+  info = function(self, t)
+    return ([[Move to target empty square, passing through any enemies in the way.
+Beginning at rank 3, Cunning Roll doubles your physical critical chance for 1 turn.]])
+  end
 }
