@@ -53,12 +53,14 @@ newTalent {
 
     -- Calculate surrounding enemies
     local nb_foes = 0
-    local act
-    for i = 1, #self.fov.actors_dist do
-      act = self.fov.actors_dist[i]
-      -- Possible bug with this formula, copied from cunning/tactical
-      if act and game.level:hasEntity(act) and self:reactionToward(act) < 0 and self:canSee(act) and act["__sqdist"] <= 2 then nb_foes = nb_foes + 1 end
+    local add_if_visible_enemy = function(x, y)
+      local target = game.level.map(x, y, game.level.map.ACTOR)
+      if target and self:reactionToward(target) < 0 and self:canSee(target) then
+        nb_foes = nb_foes + 1
+      end
     end
+    local adjacent_tg = {type = "ball", range = 0, radius = 1, selffire = false}
+    self:project(adjacent_tg, self.x, self.y, add_if_visible_enemy)
 
     -- Add new regens if needed
     if nb_foes == 0 then
