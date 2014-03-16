@@ -27,7 +27,7 @@ newTalent {
   require = lowReqGen("wil", 1),
   mode = "passive",
   points = 5,
-  
+
   getRestoreRate = function(self, t)
     return t.applyMult(self, t, 1.5 * self:getTalentLevel(t))
   end,
@@ -40,7 +40,7 @@ newTalent {
     end
   end,
   callbackOnAct = function(self, t)
-    
+
     -- Remove the existing regen rate
     if self.temp_skirmisherBreathingStamina then
       self:removeTemporaryValue("stamina_regen", self.temp_skirmisherBreathingStamina)
@@ -59,7 +59,7 @@ newTalent {
       -- Possible bug with this formula, copied from cunning/tactical
       if act and game.level:hasEntity(act) and self:reactionToward(act) < 0 and self:canSee(act) and act["__sqdist"] <= 2 then nb_foes = nb_foes + 1 end
     end
-    
+
     -- Add new regens if needed
     if nb_foes == 0 then
       self.temp_skirmisherBreathingStamina = self:addTemporaryValue("stamina_regen", t.getRestoreRate(self, t))
@@ -67,9 +67,9 @@ newTalent {
         self.temp_skirmisherBreathingLife = self:addTemporaryValue("life_regen", t.getRestoreRate(self, t))
       end
     end
-    
+
   end,
-  
+
   info = function(self, t)
     local stamina = t.getRestoreRate(self, t)
     return ([[Any time you do not have an opponent in a square adjacent to you, you gain %0.1f Stamina regen. With the third talent point, you also gain an equal amount of life regen when Breathing Room is active.]])
@@ -89,28 +89,31 @@ newTalent {
   require = lowReqGen("wil", 2),
   tactical = { STAMINA = 2 },
   random_ego = "utility",
-  
   activate = function(self, t)
-    return {
-      speed = self:addTemporaryValue("global_speed_add", -t.getSlow(self, t)),
-    }
+    -- Superloads Combat:combatFatigue.
+
+    local eff = {}
+    self:talentTemporaryValue(eff, "global_speed_add", -t.getSlow(self, t))
+    self:talentTemporaryValue(eff, "fatigue", -t.getReduction(self, t))
+    self:talentTemporaryValue(eff, "min_fatigue", t.getMinStamina(self, t))
+    return eff
   end,
-  deactivate = function(self, t, p)
-    self:removeTemporaryValue("global_speed_add", p.speed)
-    return true
-  end,
+  deactivate = function(self, t, p) return true end,
   getSlow = function(self, t)
     return .125 - self:getTalentLevelRaw(t) * .025
   end,
   getReduction = function(self, t)
     return self:combatTalentScale(t, 15, 40)
   end,
-  
+  getMinStamina = function(self, t)
+    return 10 - self:combatTalentScale(t, 15, 40)
+  end,
   info = function(self, t)
     local slow = t.getSlow(self, t) * 100
     local reduction = t.getReduction(self, t)
-    return ([[Control your movements to conserve your energy. While Pace Yourself is activated you are globally slowed by %0.1f%%, but receive a %0.1f%% discount on all Stamina based abilities.]])
-      :format(slow, reduction)
+    local min = t.getMinStamina(self, t)
+    return ([[Control your movements to conserve your energy. While Pace Yourself is activated you are globally slowed by %0.1f%%, but reduce your fatigue by %d%%, to a minimum of %d%%.]])
+      :format(slow, reduction, min)
   end,
 }
 
@@ -121,7 +124,7 @@ newTalent {
   require = lowReqGen("wil", 3),
   mode = "passive",
   points = 5,
-  
+
   getStaminaRate = function(self, t)
     return t.applyMult(self, t, .5 * self:getTalentLevel(t))
   end,
@@ -137,7 +140,7 @@ newTalent {
     end
   end,
   callbackOnAct = function(self, t)
-    
+
     -- Remove the existing regen rate
     if self.temp_skirmisherDauntlessStamina then
       self:removeTemporaryValue("stamina_regen", self.temp_skirmisherDauntlessStamina)
@@ -155,7 +158,7 @@ newTalent {
 			act = self.fov.actors_dist[i]
 			if act and self:reactionToward(act) < 0 and self:canSee(act) then nb_foes = nb_foes + 1 end
 		end
-    
+
     -- Add new regens if needed
     if nb_foes >= 1 then
       if nb_foes > 4 then nb_foes = 4 end
@@ -164,9 +167,9 @@ newTalent {
         self.temp_skirmisherDauntlessLife = self:addTemporaryValue("life_regen", t.getLifeRate(self, t) * nb_foes)
       end
     end
-    
+
   end,
-  
+
   info = function(self, t)
     local stamina = t.getStaminaRate(self, t)
     local health = t.getLifeRate(self, t)
@@ -174,7 +177,7 @@ newTalent {
       :format(stamina, health)
   end,
 }
-    
+
 newTalent {
   short_name = "SKIRMISHER_THE_ETERNAL_WARRIOR",
   name = "The Eternal Warrior",
@@ -182,7 +185,7 @@ newTalent {
   require = lowReqGen("wil", 4),
   mode = "passive",
   points = 5,
-  
+
   getResist = function(self, t)
     return .5 * self:getTalentLevel(t)
   end,
@@ -202,7 +205,7 @@ newTalent {
       return 1
     end
   end,
-  
+
   -- call from incStamina whenever stamina is incremented or decremented
   onIncStamina = function(self, t, delta)
     if delta < 0 and not self.temp_skirmisherSpentThisTurn then
@@ -217,7 +220,7 @@ newTalent {
   callbackOnAct = function(self, t)
     self.temp_skirmisherSpentThisTurn = false
   end,
-  
+
   info = function(self, t)
     local max = t.getMax(self, t)
     local duration = t.getDuration(self, t)

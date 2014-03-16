@@ -175,13 +175,12 @@ newTalent {
   getReduction = function(self, t)
     return self:combatTalentScale(t, 50, 66)
   end,
-  getTriggerCost = function(self, t)
-    return 15
-  end,
   -- called by mod/Actor.lua, although it could be a callback one day
   onHit = function(self, t, damage)
-    if self:hasEffect("EFF_SKIRMISHER_TRAINED_REACTIONS_COOLDOWN") then return damage end
-    local cost = t.getTriggerCost(self, t)
+    -- Don't have trigger cooldown.
+    -- if self:hasEffect("EFF_SKIRMISHER_TRAINED_REACTIONS_COOLDOWN") then return damage end
+
+    local cost = t.stamina_per_use(self, t)
     if damage >= self.max_life * t.getLifeTrigger(self, t) * 0.01 then
       -- now to find empty space
       local nx, ny = util.findFreeGrid(self.x, self.y, 1, true, {[Map.ACTOR]=true})
@@ -189,8 +188,9 @@ newTalent {
         local ox, oy = self.x, self.y
         self:move(nx, ny, true)
 
-        -- Apply cooldown effect.
-        self:setEffect("EFF_SKIRMISHER_TRAINED_REACTIONS_COOLDOWN", t.cooldown(self, t), {})
+        -- Don't have trigger cooldown.
+        -- -- Apply cooldown effect.
+        -- self:setEffect("EFF_SKIRMISHER_TRAINED_REACTIONS_COOLDOWN", t.cooldown(self, t), {})
 
         -- Apply effect with duration 0.
         self:setEffect("EFF_SKIRMISHER_DEFENSIVE_ROLL", 1, {reduce = t.getReduction(self, t)})
@@ -213,7 +213,7 @@ newTalent {
   info = function(self, t)
     local trigger = t.getLifeTrigger(self, t)
     local reduce = t.getReduction(self, t)
-    local cost = t.getTriggerCost(self, t)
+    local cost = t.stamina_per_use(self, t) * (1 + self:combatFatigue() * 0.01)
     return ([[While sustainted, any time you would lose more than %d%% of your life in a single hit, you instead roll out of the way, moving into an adjacent tile and gaining a temporary buff that reduces this damage and all further damage that turn by %d%%.
 			This requires an empty square to move to, costs %d Stamina per roll, and will not trigger if you do not have the Stamina.]])
       :format(trigger, reduce, cost)
@@ -229,7 +229,7 @@ newTalent {
   mode = "passive",
   points = 5,
   cooldown_bonus = function(self, t) return math.floor(self:getTalentLevel(t)) end,
-  stamina_bonus = function(self, t) return math.floor(self:getTalentLevel(t) * 3) end,
+  stamina_bonus = function(self, t) return math.floor(self:getTalentLevel(t) * 2) end,
   speed_buff = function(self, t)
     local level = self:getTalentLevel(t)
     if level >= 5 then return {global_speed_add = 0.2, duration = 2} end

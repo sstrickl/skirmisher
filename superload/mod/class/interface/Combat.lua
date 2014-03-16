@@ -42,4 +42,14 @@ function _M:attackTargetWith(target, weapon, damtype, mult, force_dam)
   return base_attackTargetWith(self, target, weapon, damtype, mult, force_dam)
 end
 
+-- Pace Yourself
+local combatFatigue = _M.combatFatigue
+function _M:combatFatigue()
+  local min = self.min_fatigue or 0
+	if self.fatigue < min then return min end
+	if self:knowTalent(self.T_NO_FATIGUE) then return min end
+	if self.fatigue < 0 then return self.fatigue end
+	return combatFatigue(self)
+end
+
 return _M
