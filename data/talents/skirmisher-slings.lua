@@ -96,12 +96,15 @@ newTalent {
   getDamage = function(self, t)
     return self:combatTalentWeaponDamage(t, 1.4, 2.4)
   end,
+  -- Broken in 1.1.5. Workaround in hooks/load.lua.
+  --[[
   callbackOnMove = function(self, t, moved, force, ox, oy)
     local cooldown = self.talents_cd[t.id] or 0
     if cooldown > 0 then
       self.talents_cd[t.id] = math.max(cooldown - 1, 0)
     end
   end,
+  ]]--
   action = function(self, t)
     local old_speed = self.combat_physspeed
     self.combat_physspeed = old_speed * 2

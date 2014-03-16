@@ -29,12 +29,19 @@ class:bindHook("ToME:load", hook)
 
 hook = function(self, data)
   if data.moved and not data.force and self.skirmisher_reload_on_move then
+    -- Swift Shoot cooldown. (Change back in 1.1.6)
+    local swift = self:getTalentFromId("T_SKIRMISHER_SWIFT_SHOT")
+    local cooldown = self.talents_cd[swift.id] or 0
+    if cooldown > 0 then
+      self.talents_cd[swift.id] = math.max(cooldown - 1, 0)
+    end
+
+    -- Reload on move.
 		local ammo, err = self:hasAmmo()
     if not ammo then return end
-    if ammo.combat.shots_left >= ammo.combat.capacity then return end
 		for i = 1, self.skirmisher_reload_on_move do
-			ammo.combat.shots_left = ammo.combat.shots_left + 1
 			if ammo.combat.shots_left >= ammo.combat.capacity then break end
+			ammo.combat.shots_left = ammo.combat.shots_left + 1
 		end
   end
 end
