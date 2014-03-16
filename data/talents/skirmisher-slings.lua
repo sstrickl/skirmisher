@@ -38,7 +38,7 @@ reload.shots_per_turn = function(self, t)
   local sling_supremacy = Talents:getTalentFromId("T_SKIRMISHER_SLING_SUPREMACY")
   local new_spt = self:getTalentLevelRaw(t) +
     (self:attr("ammo_reload_speed") or 0) +
-    sling_supremacy.reload_bonus(self, sling_supremacy)
+    sling_supremacy.active_reload_bonus(self, sling_supremacy)
   return math.max(old_spt, new_spt)
 end
 
@@ -52,25 +52,31 @@ newTalent {
   require = { stat = { dex=function(level) return 12 + level * 6 end }, },
   points = 5,
   mode = "passive",
-  reload_bonus = function(self, t)
+  active_reload_bonus = function(self, t)
     local level = self:getTalentLevelRaw(t)
     if level >= 5 then return 3 end
     if level >= 4 then return 2 end
     if level >= 2 then return 1 end
     return 0
   end,
+  passive_reload_bonus = function(self, t)
+    return math.floor(self:getTalentLevel(t))
+  end,
+  passives = function(self, t, p)
+    self:talentTemporaryValue(p, "skirmisher_reload_on_move", t.passive_reload_bonus(self, t))
+  end,
 	getDamage = function(self, t) return self:getTalentLevel(t) * 10 end,
 	getPercentInc = function(self, t) return math.sqrt(self:getTalentLevel(t) / 5) / 2 end,
 	info = function(self, t)
 		local damage = t.getDamage(self, t)
 		local inc = t.getPercentInc(self, t)
-		return ([[Increases Physical Power by %d and increases weapon damage by %d%% when using slings.
+		return ([[Increases Physical Power by %d and increases weapon damage by %d%% when using slings. Whenevry you move, reload %d shots.
+
 		Also, when using Reload:
 		At level 2, it grants one more reload per turn.
 		At level 4, it grants two more reloads per turn.
-		At level 5, it grants three more reloads per turn.
-		]]):
-		format(damage, inc * 100)
+		At level 5, it grants three more reloads per turn.]])
+      :format(damage, inc * 100, t.passive_reload_bonus(self, t))
 	end,
 }
 

@@ -26,3 +26,16 @@ hook = function(self, data)
 	Birther:loadDefinition("/data-skirmisher/birth.lua")
 end
 class:bindHook("ToME:load", hook)
+
+hook = function(self, data)
+  if data.moved and not data.force and self.skirmisher_reload_on_move then
+		local ammo, err = self:hasAmmo()
+    if not ammo then return end
+    if ammo.combat.shots_left >= ammo.combat.capacity then return end
+		for i = 1, self.skirmisher_reload_on_move do
+			ammo.combat.shots_left = ammo.combat.shots_left + 1
+			if ammo.combat.shots_left >= ammo.combat.capacity then break end
+		end
+  end
+end
+class:bindHook("Actor:move", hook)
