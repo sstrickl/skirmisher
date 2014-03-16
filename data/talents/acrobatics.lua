@@ -57,8 +57,8 @@ newTalent {
     -- Get Landing Point.
     local tg = self:getTalentTarget(t)
     local tx, ty, target = self:getTarget(tg)
-    if core.fov.distance(self.x, self.y, tx, ty) > self:getTalentRange(t) then return end
     if not tx or not ty then return end
+    if core.fov.distance(self.x, self.y, tx, ty) > self:getTalentRange(t) then return end
     if tx == self.x and ty == self.y then return end
     if target or
       game.level.map:checkEntity(tx, ty, Map.TERRAIN, "block_move", self)
