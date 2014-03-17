@@ -233,7 +233,7 @@ newTalent {
     return true
   end,
   getStaminaPerShot = function(self, t)
-    return 10
+    return 10 * (1 + self:combatFatigue() * 0.01)
   end,
   getMult = function(self, t)
     return self:combatTalentScale(t, .9, 1.6)
