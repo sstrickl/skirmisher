@@ -161,7 +161,7 @@ newTalent {
   end,
   -- Maximum number of shots fired.
   limit_shots = function(self, t)
-    return math.floor(2 + self:getTalentLevel(t))
+    return math.floor(4 + self:getTalentLevel(t))
   end,
   action = function(self, t)
     local tg = self:getTalentTarget(t)
@@ -173,29 +173,33 @@ newTalent {
     game.target.forced = {x, y, target}
 
     local params = {mult = t.damage_multiplier(self, t), phasing=true}
-
-    -- First round of bullets.
-    local targets = self:archeryAcquireTargets(tg, {limit_shots = limit_shots})
-    if not targets then
-      game.target.forced = old_target_forced
-      return
-    end
-    self:archeryShoot(targets, t, nil, params)
-    limit_shots = limit_shots - #targets
-
-    -- Second round of bullets.
+   
+    -- Acquire targets
     local targets = self:archeryAcquireTargets(tg, {limit_shots = limit_shots, no_energy = true})
     if not targets then
       game.target.forced = old_target_forced
       return true
     end
-    self:archeryShoot(targets, t, nil, params)
+    
+    -- Double list
+    for i = 1, #targets do
+      targets[#targets+1] = targets[i]
+    end
+    -- Construct new list
+    local random_targets = { }
+    for i = 1, limit_shots do
+      if #targets == 0 then break end
+      random_targets[#random_targets+1] = table.remove(targets, rng.range(1, #targets))
+    end
+    
+    -- Fire shots
+    self:archeryShoot(random_targets, t, nil, params)
 
     game.target.forced = old_target_forced
     return true
   end,
   info = function(self, t)
-    return ([[Take aim and unload %d shots for %d%% weapon damage each against enemies inside a cone. Each enemy can only be targeted two times at most. Using Swift Shot lowers the cooldown by 1.]])
+    return ([[Take aim and unload %d shots for %d%% weapon damage each against random enemies inside a cone. Each enemy can only be hit once, or twice starting with the third talent point. Using Swift Shot lowers the cooldown by 1.]])
       :format(t.limit_shots(self, t),
               t.damage_multiplier(self, t) * 100)
   end,
