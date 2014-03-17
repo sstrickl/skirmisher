@@ -224,7 +224,11 @@ shoot.action = function(self, t)
     talent = t
   }
   local x, y, target = self:getTarget(tg)
+  if not target then return end
   game.target.forced = {x, y, target}
+
+  local old_speed = self.combat_physspeed
+  self.combat_physspeed = old_speed * shots
 
   -- Fire all shots.
   local i
@@ -234,6 +238,7 @@ shoot.action = function(self, t)
     self:archeryShoot(targets, t, nil, {use_psi_archery = t.use_psi_archery(self, t)})
   end
 
+  self.combat_physspeed = old_speed
   game.target.forced = old_target_forced
 
   return i ~= 1
