@@ -268,7 +268,7 @@ newTalent {
     return self:getTalentLevelRaw(t) >= 5 and 3 or 2
   end,
   shot_stamina = function(self, t)
-    return self:getTalentLevelRaw(t) >= 3 and 15 or 20
+    return (self:getTalentLevelRaw(t) >= 3 and 15 or 20) * (1 + self:combatFatigue() * 0.01)
   end,
   damage_multiplier = function(self, t)
     return self:combatTalentWeaponDamage(t, 0.75, 1.0)
