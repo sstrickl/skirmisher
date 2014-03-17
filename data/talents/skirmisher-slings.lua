@@ -224,7 +224,7 @@ shoot.action = function(self, t)
     talent = t
   }
   local x, y, target = self:getTarget(tg)
-  if not target then return end
+  if not x or not y then return end
   game.target.forced = {x, y, target}
 
   local old_speed = self.combat_physspeed
