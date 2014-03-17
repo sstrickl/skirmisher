@@ -270,20 +270,18 @@ newTalent {
     return math.max(0, math.floor(10 - self:getTalentLevel(t)))
   end,
   bullet_count = function(self, t)
-    return self:getTalentLevelRaw(t) >= 5 and 3 or 2
+    return 2
   end,
   shot_stamina = function(self, t)
     return 25 * (1 + self:combatFatigue() * 0.01)
   end,
   damage_multiplier = function(self, t)
-    return self:combatTalentWeaponDamage(t, 0.75, 1.0)
+    return self:combatTalentWeaponDamage(t, 0.6, 1.0)
   end,
   activate = function(self, t) return {} end,
   deactivate = function(self, t, p) return true end,
   info = function(self, t)
-    return ([[Your basic Shot talent now fires %d sling bullets for %d%% weapon damage while this is activated, at a cost of %d Stamina per attack.
-
-The 5th talent point adds an extra shot.]])
+    return ([[Your basic Shot talent now fires %d sling bullets for %d%% weapon damage while this is activated, at a cost of %d Stamina per attack.]])
       :format(t.bullet_count(self, t),
               t.damage_multiplier(self, t) * 100,
               t.shot_stamina(self, t))

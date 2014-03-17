@@ -128,7 +128,7 @@ newTalent {
   points = 5,
 
   getStaminaRate = function(self, t)
-    return t.applyMult(self, t, .5 * self:getTalentLevel(t))
+    return t.applyMult(self, t, .3 * self:getTalentLevel(t))
   end,
   getLifeRate = function(self, t)
     return t.applyMult(self, t, 1 * self:getTalentLevel(t))
