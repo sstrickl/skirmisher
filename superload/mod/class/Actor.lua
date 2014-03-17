@@ -57,15 +57,24 @@ function _M:canWearObject(o, try_slot)
 end
 
 -- This seems like the only reasonable place to do projectile deflection
+-- we're also going to prevent phasing projectiles from stopping anywhere but their target
 function _M:projectDoStop(typ, tg, damtype, dam, particles, lx, ly, tmp, rx, ry, projectile)
+  print("[SKIRMISHER] using modified projectDoStop")
+  -- Abort if phasing and not at target
+  if projectile.project.def.tg.archery and projectile.project.def.tg.archery.phasing then
+    print("PHASING", lx, ly, projectile.project.def.x, projectile.project.def.y)
+    if lx ~= projectile.project.def.x or ly ~= projectile.project.def.y then return end
+  end
+  
+  -- Deflection check
   local target = game.level.map:call(lx, ly, Map.ACTOR)
-  print("[SKIRMISHER] using modified projectDoStop");
   if target and target.getTalentFromId and target ~= projectile.src then
     if target:knowTalent(target.T_SKIRMISHER_BUCKLER_MASTERY) then
       local t = target:getTalentFromId(target.T_SKIRMISHER_BUCKLER_MASTERY)
       lx, ly = t.offsetTarget(target, t, lx, ly, projectile)
     end
   end
+  
   return base_projectDoStop(self, typ, tg, damtype, dam, particles, lx, ly, tmp, rx, ry, projectile)
 end
 

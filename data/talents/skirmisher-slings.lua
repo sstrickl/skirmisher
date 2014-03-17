@@ -172,7 +172,7 @@ newTalent {
     local x, y, target = self:getTarget(tg)
     game.target.forced = {x, y, target}
 
-    local params = {mult = t.damage_multiplier(self, t)}
+    local params = {mult = t.damage_multiplier(self, t), phasing=true}
 
     -- First round of bullets.
     local targets = self:archeryAcquireTargets(tg, {limit_shots = limit_shots})
