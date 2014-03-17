@@ -245,7 +245,7 @@ newTalent {
     if not sling or self.stamina < stamina then
       return false
     end
-    local targets = self:archeryAcquireTargets(nil, {one_shot=true, x=target.x, y=target.y})
+    local targets = self:archeryAcquireTargets(nil, {one_shot=true, x=target.x, y=target.y, no_energy = true})
     if targets then
       --self:logCombat(who, "#Source# follows up with a countershot.")
       self:incStamina(-stamina)
