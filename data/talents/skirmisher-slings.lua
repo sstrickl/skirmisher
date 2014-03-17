@@ -283,7 +283,6 @@ newTalent {
   info = function(self, t)
     return ([[Your basic Shot talent now fires %d sling bullets for %d%% weapon damage while this is activated, at a cost of %d Stamina per attack.
 
-The 3rd talent point reduces the stamina cost to 15.
 The 5th talent point adds an extra shot.]])
       :format(t.bullet_count(self, t),
               t.damage_multiplier(self, t) * 100,
