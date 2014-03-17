@@ -29,7 +29,7 @@ newTalent {
   points = 5,
 
   getRestoreRate = function(self, t)
-    return t.applyMult(self, t, 1.5 * self:getTalentLevel(t))
+    return t.applyMult(self, t, 1.2 * self:getTalentLevel(t))
   end,
   applyMult = function(self, t, gain)
     if self:knowTalent(self.T_SKIRMISHER_THE_ETERNAL_WARRIOR) then
@@ -102,13 +102,13 @@ newTalent {
   end,
   deactivate = function(self, t, p) return true end,
   getSlow = function(self, t)
-    return .125 - self:getTalentLevelRaw(t) * .025
+    return .175 - self:getTalentLevelRaw(t) * .025
   end,
   getReduction = function(self, t)
-    return self:combatTalentScale(t, 15, 40)
+    return self:combatTalentScale(t, 10, 30)
   end,
   getMinStamina = function(self, t)
-    return 10 - self:combatTalentScale(t, 15, 40)
+    return 10 - self:combatTalentScale(t, 10, 30)
   end,
   info = function(self, t)
     local slow = t.getSlow(self, t) * 100
