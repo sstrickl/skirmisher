@@ -164,39 +164,43 @@ newTalent {
     return math.floor(4 + self:getTalentLevel(t))
   end,
   action = function(self, t)
+    -- Get list of possible targets, doubled.
     local tg = self:getTalentTarget(t)
-    local limit_shots = t.limit_shots(self, t)
+    local x, y = self:getTarget(tg)
+    if not x or not y then return end
+    local targets = {}
+    local add_target = function(x, y)
+      local target = game.level.map(x, y, game.level.map.ACTOR)
+      if target and self:reactionToward(target) < 0 and self:canSee(target) then
+        targets[#targets + 1] = target
+        targets[#targets + 1] = target
+      end
+    end
+    self:project(tg, x, y, add_target)
+    if #targets == 0 then return end
 
-    -- Do targeting.
+    table.shuffle(targets)
+
+    -- Fire each shot individually.
     local old_target_forced = game.target.forced
-    local x, y, target = self:getTarget(tg)
-    game.target.forced = {x, y, target}
-
-    local params = {mult = t.damage_multiplier(self, t), phasing=true}
-   
-    -- Acquire targets
-    local targets = self:archeryAcquireTargets(tg, {limit_shots = limit_shots, no_energy = true})
-    if not targets then
-      game.target.forced = old_target_forced
-      return true
+    local limit_shots = t.limit_shots(self, t)
+    local shot_params = {mult = t.damage_multiplier(self, t), phasing = true}
+    local fired = false -- If we've fired at least one shot.
+    for i = 1, math.min(limit_shots, #targets) do
+      local target = targets[i]
+      game.target.forced = {target.x, target.y, target}
+      local targets = self:archeryAcquireTargets(nil, {one_shot=true, no_energy = (not fired)})
+      if targets then
+        self:archeryShoot(targets, t, nil, shot_params)
+        fired = true
+      else
+        -- If no target that means we're out of ammo.
+        break
+      end
     end
-    
-    -- Double list
-    for i = 1, #targets do
-      targets[#targets+1] = targets[i]
-    end
-    -- Construct new list
-    local random_targets = { }
-    for i = 1, limit_shots do
-      if #targets == 0 then break end
-      random_targets[#random_targets+1] = table.remove(targets, rng.range(1, #targets))
-    end
-    
-    -- Fire shots
-    self:archeryShoot(random_targets, t, nil, params)
 
     game.target.forced = old_target_forced
-    return true
+    return fired
   end,
   info = function(self, t)
     return ([[Take aim and unload %d shots for %d%% weapon damage each against random enemies inside a cone. Each enemy can only be hit once, or twice starting with the third talent point. Using Swift Shot lowers the cooldown by 1.]])
