@@ -138,7 +138,7 @@ newTalent {
     local targets = self:archeryAcquireTargets(nil, {one_shot=true, x=target.x, y=target.y})
     if targets then
       --game.logSeen(self, "%s follows up with a shot from %s!", self.name:capitalize(), sling:getName())
-      self:archeryShoot(targets, t, nil, {mult=t.getSlingMult(self, t)})
+      self:archeryShoot(targets, t, nil, {mult=t.getSlingMult(self, t), no_energy = true})
     end
 
     return true
