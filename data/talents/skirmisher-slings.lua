@@ -192,7 +192,8 @@ newTalent {
       local targets = self:archeryAcquireTargets(nil, {one_shot=true, no_energy = fired})
       if targets then
         local params = table.clone(shot_params_base)
-        params.phase_target = targets.dual and targets.main[1] or targets[1]
+        local target = targets.dual and targets.main[1] or targets[1]
+        params.phase_target = game.level.map(target.x, target.y, game.level.map.ACTOR)
         self:archeryShoot(targets, t, nil, params)
         fired = true
       else
