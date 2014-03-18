@@ -28,7 +28,7 @@ function _M:canWearObject(o, try_slot)
   if o.subtype == "shield" and self:knowTalent(self.T_SKIRMISHER_BUCKLER_EXPERTISE) then
     print("[SKIRMISHER] Using skirmisher shield check")
     -- we still have to do checks on the slot, copy/pasted mostly
-    
+
     -- Check forbidden slot
     if o.slot_forbid then
       local inven = self:getInven(o.slot_forbid)
@@ -48,9 +48,9 @@ function _M:canWearObject(o, try_slot)
         end
       end
     end
-    
+
     return true
-    
+
   else
     return base_canWearObject(self, o, try_slot)
   end
@@ -63,9 +63,12 @@ function _M:projectDoStop(typ, tg, damtype, dam, particles, lx, ly, tmp, rx, ry,
   -- Abort if phasing and not at target
   if projectile.project.def.tg.archery and projectile.project.def.tg.archery.phasing then
     print("PHASING", lx, ly, projectile.project.def.x, projectile.project.def.y)
-    if lx ~= projectile.project.def.x or ly ~= projectile.project.def.y then return end
+    local target = game.level.map(lx, ly, game.level.map.ACTOR)
+    if (lx ~= projectile.project.def.x or ly ~= projectile.project.def.y) and
+      target ~= projectile.project.def.tg.archery.phase_target
+    then return end
   end
-  
+
   -- Deflection check
   local target = game.level.map:call(lx, ly, Map.ACTOR)
   if target and target.getTalentFromId and target ~= projectile.src then
@@ -74,7 +77,7 @@ function _M:projectDoStop(typ, tg, damtype, dam, particles, lx, ly, tmp, rx, ry,
       lx, ly = t.offsetTarget(target, t, lx, ly, projectile)
     end
   end
-  
+
   return base_projectDoStop(self, typ, tg, damtype, dam, particles, lx, ly, tmp, rx, ry, projectile)
 end
 
