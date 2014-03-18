@@ -185,11 +185,11 @@ newTalent {
     local old_target_forced = game.target.forced
     local limit_shots = t.limit_shots(self, t)
     local shot_params = {mult = t.damage_multiplier(self, t), phasing = true}
-    local fired = false -- If we've fired at least one shot.
+    local fired = nil -- If we've fired at least one shot.
     for i = 1, math.min(limit_shots, #targets) do
       local target = targets[i]
       game.target.forced = {target.x, target.y, target}
-      local targets = self:archeryAcquireTargets(nil, {one_shot=true, no_energy = (not fired)})
+      local targets = self:archeryAcquireTargets(nil, {one_shot=true, no_energy = fired})
       if targets then
         self:archeryShoot(targets, t, nil, shot_params)
         fired = true
