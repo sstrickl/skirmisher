@@ -23,7 +23,7 @@ newTalentType {
 local sling_equipped = function(self, silent)
   if not self:hasArcheryWeapon("sling") then
     if not silent then
-      game.logPlayer(self, "You must weild a sling!")
+      game.logPlayer(self, "You must wield a sling!")
     end
     return false
   end
@@ -70,7 +70,7 @@ newTalent {
 	info = function(self, t)
 		local damage = t.getDamage(self, t)
 		local inc = t.getPercentInc(self, t)
-		return ([[Increases Physical Power by %d and increases weapon damage by %d%% when using slings. Whenevry you move, reload %d shots.
+		return ([[Increases Physical Power by %d and increases weapon damage by %d%% when using slings. Whenever you move, reload %d shots.
 
 		Also, when using Reload:
 		At level 2, it grants one more reload per turn.
@@ -164,7 +164,8 @@ newTalent {
     return math.floor(4 + self:getTalentLevel(t))
   end,
   action = function(self, t)
-    -- Get list of possible targets, doubled.
+    -- Get list of possible targets, possibly doubled.
+    local double = self:getTalentLevel(t) >= 3
     local tg = self:getTalentTarget(t)
     local x, y = self:getTarget(tg)
     if not x or not y then return end
@@ -173,7 +174,7 @@ newTalent {
       local target = game.level.map(x, y, game.level.map.ACTOR)
       if target and self:reactionToward(target) < 0 and self:canSee(target) then
         targets[#targets + 1] = target
-        targets[#targets + 1] = target
+        if double then targets[#targets + 1] = target end
       end
     end
     self:project(tg, x, y, add_target)
