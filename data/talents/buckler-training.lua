@@ -114,12 +114,19 @@ newTalent {
     if autocrit then
       self.combat_physcrit = self.combat_physcrit + 1000
     end
+
+    -- Modify shield combat to use dex.
+    local combat = table.clone(shield.special_combat)
+    combat.dammod.dex = combat.dammod.dex + combat.dammod.str
+    combat.dammod.str = 0
+
     -- First attack with shield
-    local speed, hit = self:attackTargetWith(target, shield.special_combat, nil, t.getShieldMult(self, t))
+    local speed, hit = self:attackTargetWith(target, combat, nil, t.getShieldMult(self, t))
     -- At talent levels >= 5, attack twice
     if self:getTalentLevelRaw(t) >= 5 then
-      local speed, hit = self:attackTargetWith(target, shield.special_combat, nil, t.getShieldMult(self, t))
+      local speed, hit = self:attackTargetWith(target, combat, nil, t.getShieldMult(self, t))
     end
+
     if autocrit then
       self.combat_physcrit = self.combat_physcrit - 1000
     end
@@ -147,7 +154,7 @@ newTalent {
     local shieldMult = t.getShieldMult(self, t) * 100
     local tiles = t.getDist(self, t)
     local slingMult = t.getSlingMult(self, t) * 100
-    return ([[Bash an enemy in melee range with your shield, doing %d%% damage and knocking back %d squares. You follow with a deadly short-range sling attack, dealing %d%% damage.
+    return ([[Bash an enemy in melee range with your shield, doing %d%% damage and knocking back %d squares. You follow with a deadly short-range sling attack, dealing %d%% damage. The shield bash will use Dexterity instead of Strength for the shield's bonus damage.
 			With the fifth talent point, you will strike with your shield twice.]])
       :format(shieldMult, tiles, slingMult)
 	end,
