@@ -110,7 +110,7 @@ newTalent {
   cooldown = function(self, t) return 20 - cooldown_bonus(self) end,
   no_energy = true,
   stamina = function(self, t)
-    return math.max(0, 45 - self:getTalentLevel(t) * 5 - stamina_bonus(self))
+    return math.max(0, 40 - self:getTalentLevel(t) * 3 - stamina_bonus(self))
   end,
   tactical = {ESCAPE = 2, BUFF = 1},
   range = function(self, t)
