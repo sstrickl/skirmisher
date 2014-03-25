@@ -23,7 +23,7 @@ newTalentType {
 local sling_equipped = function(self, silent)
   if not self:hasArcheryWeapon("sling") then
     if not silent then
-      game.logPlayer(self, "You must weild a sling!")
+      game.logPlayer(self, "You must wield a sling!")
     end
     return false
   end
