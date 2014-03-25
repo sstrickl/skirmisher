@@ -51,7 +51,7 @@ newTalent {
     return {type="beam", range=self:getTalentRange(t), talent=t}
   end,
   speed_bonus = function(self, t)
-    return self:getTalentLevel(t) * 0.1
+    return 0.5 + self:getTalentLevel(t) * 0.1
   end,
   action = function(self, t)
     -- Get Landing Point.
